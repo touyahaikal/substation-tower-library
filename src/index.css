@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- THEME TOKENS (space-separated RGB so Tailwind alpha works) ---------- */
+
+/* Theme 1 · TTPD — Light: THE TORTURED POETS DEPARTMENT */
+:root,
+[data-theme='ttpd'][data-mode='light'] {
+  --bg: 245 242 235;      /* #F5F2EB */
+  --card: 253 251 247;    /* #FDFBF7 */
+  --line: 222 215 200;    /* #DED7C8 */
+  --ink: 35 31 32;        /* #231F20 */
+  --accent: 124 111 100;  /* #7C6F64 */
+  --accent2: 124 111 100;
+  --muted: 124 111 100;
+  --font-display: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Courier Prime', 'Courier New', monospace;
+  --radius: 6px;
+}
+
+/* Theme 1 · TTPD — Dark: THE ANTHOLOGY */
+[data-theme='ttpd'][data-mode='dark'] {
+  --bg: 18 17 16;         /* #121110 */
+  --card: 27 25 24;       /* #1B1918 */
+  --line: 50 46 43;       /* #322E2B */
+  --ink: 234 229 220;     /* #EAE5DC */
+  --accent: 168 155 140;  /* #A89B8C */
+  --accent2: 168 155 140;
+  --muted: 168 155 140;
+}
+
+/* Theme 2 · Substation Tower — Light: Daylight Shift */
+[data-theme='substation'][data-mode='light'] {
+  --bg: 241 243 245;      /* #F1F3F5 */
+  --card: 255 255 255;    /* #FFFFFF */
+  --line: 207 214 222;    /* #CFD6DE */
+  --ink: 24 28 32;        /* #181C20 */
+  --accent: 217 119 6;    /* #D97706 */
+  --accent2: 37 99 235;   /* cobalt voltage */
+  --muted: 90 100 112;
+  --font-display: 'Chakra Petch', 'Inter', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --radius: 3px;
+}
+
+/* Theme 2 · Substation Tower — Dark: Blackout */
+[data-theme='substation'][data-mode='dark'] {
+  --bg: 11 13 15;         /* #0B0D0F */
+  --card: 20 24 29;       /* #14181D */
+  --line: 39 46 54;       /* #272E36 */
+  --ink: 230 237 243;     /* #E6EDF3 */
+  --accent: 245 158 11;   /* #F59E0B */
+  --accent2: 16 185 129;  /* #10B981 */
+  --muted: 139 151 163;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle grid for Substation Tower dark mode */
+[data-theme='substation'][data-mode='dark'] body {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* ---------- Reusable component classes ---------- */
+@layer components {
+  .panel {
+    @apply bg-card border border-line;
+    border-radius: var(--radius);
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-line bg-card text-ink transition hover:border-accent hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed;
+    border-radius: var(--radius);
+  }
+  .btn-primary {
+    @apply bg-accent text-white border-accent hover:text-white hover:opacity-90;
+  }
+  [data-theme='substation'][data-mode='dark'] .btn-primary {
+    color: #0b0d0f;
+  }
+  [data-theme='substation'][data-mode='dark'] .btn-primary:hover {
+    color: #0b0d0f;
+  }
+  .btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-line/40;
+  }
+  .input {
+    @apply w-full bg-bg border border-line px-3 py-1.5 text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-accent;
+    border-radius: var(--radius);
+  }
+  .label {
+    @apply block text-xs uppercase tracking-wider text-muted mb-1 font-mono;
+  }
+  .h-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs border border-line text-muted;
+    border-radius: 999px;
+  }
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line)) transparent;
+}
+
+/* CSS-rendered book cover */
+.book-cover {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 2px 3px 8px rgb(0 0 0 / 0.25);
+}
+.book-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 7%;
+  background: rgb(0 0 0 / 0.22);
+}
+
+/* Prevent grid/flex children from forcing horizontal overflow on narrow screens */
+main [class*='grid'] > * { min-width: 0; }
+main .panel { min-width: 0; max-width: 100%; }
+main .panel .flex > div:not([class*='shrink']) { min-width: 0; }
