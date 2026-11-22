@@ -1,0 +1,988 @@
+{
+  "books": [
+    {
+      "id": "b1",
+      "title": "The Midnight Library",
+      "author": "Matt Haig",
+      "summary": "Between life and death there is a library, and within it, an infinite number of books of lives you could have lived.",
+      "genres": [
+        "Fantasy",
+        "Literary"
+      ],
+      "pages": 304,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#1F2933",
+        "style": "circle",
+        "url": ""
+      },
+      "status": "finished",
+      "priority": "Want to Read",
+      "startDate": "2026-01-04",
+      "finishDate": "2026-01-19",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 5,
+        "text": "Gentle, clever and quietly devastating. I underlined half of it.",
+        "scores": {
+          "plot": 4,
+          "characters": 4,
+          "writing": 4,
+          "pacing": 5,
+          "world": 5
+        }
+      },
+      "moods": [
+        "Hopeful",
+        "Reflective"
+      ],
+      "tropes": [
+        "Second chances"
+      ],
+      "spice": 0,
+      "tears": 3,
+      "currency": "MYR",
+      "price": 42.9,
+      "favorite": true,
+      "quotes": [
+        {
+          "id": "q1",
+          "text": "Between life and death there is a library.",
+          "page": 5,
+          "date": "2026-01-05"
+        },
+        {
+          "id": "q2",
+          "text": "You don’t have to understand life. You just have to live it.",
+          "page": 214,
+          "date": "2026-01-15"
+        }
+      ],
+      "notes": [
+        {
+          "id": "n1",
+          "text": "The Book of Regrets is such a good device.",
+          "date": "2026-01-08"
+        }
+      ],
+      "readingLog": [
+        {
+          "id": "l1",
+          "date": "2026-01-04",
+          "pages": 60
+        },
+        {
+          "id": "l2",
+          "date": "2026-01-08",
+          "pages": 80
+        },
+        {
+          "id": "l3",
+          "date": "2026-01-12",
+          "pages": 90
+        },
+        {
+          "id": "l4",
+          "date": "2026-01-19",
+          "pages": 74
+        }
+      ],
+      "characters": [
+        {
+          "id": "c1",
+          "name": "Nora Seed",
+          "note": "Protagonist",
+          "x": 60,
+          "y": 60
+        },
+        {
+          "id": "c2",
+          "name": "Mrs Elm",
+          "note": "The librarian",
+          "x": 300,
+          "y": 60
+        },
+        {
+          "id": "c3",
+          "name": "Joe",
+          "note": "Ex-fiancé",
+          "x": 180,
+          "y": 190
+        }
+      ],
+      "relations": [
+        {
+          "id": "r1",
+          "from": "c1",
+          "to": "c2",
+          "label": "guided by"
+        },
+        {
+          "id": "r2",
+          "from": "c1",
+          "to": "c3",
+          "label": "former love"
+        }
+      ],
+      "vocab": [
+        {
+          "id": "v1",
+          "word": "Ephemeral",
+          "def": "Lasting a very short time.",
+          "known": false
+        }
+      ],
+      "reads": 1,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b2",
+      "title": "Dune",
+      "author": "Frank Herbert",
+      "summary": "A desert planet, a boy destined to become more than a man, and the spice that rules the universe.",
+      "genres": [
+        "Sci-Fi",
+        "Classic"
+      ],
+      "pages": 688,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#B8860B",
+        "style": "stripes",
+        "url": ""
+      },
+      "status": "finished",
+      "priority": "Want to Read",
+      "startDate": "2026-02-01",
+      "finishDate": "2026-03-02",
+      "readWhere": "Borrowed / Library",
+      "sourceNote": "KL Public Library",
+      "returnDate": "",
+      "series": "Dune Chronicles",
+      "seriesNumber": 1,
+      "seriesTotal": 6,
+      "review": {
+        "rating": 5,
+        "text": "Dense, political, mesmerising.",
+        "scores": {
+          "plot": 5,
+          "characters": 4,
+          "writing": 4,
+          "pacing": 3,
+          "world": 5
+        }
+      },
+      "moods": [
+        "Tense",
+        "Adventurous"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "USD",
+      "price": 0,
+      "favorite": false,
+      "quotes": [
+        {
+          "id": "q3",
+          "text": "Fear is the mind-killer.",
+          "page": 8,
+          "date": "2026-02-02"
+        }
+      ],
+      "notes": [],
+      "readingLog": [
+        {
+          "id": "l5",
+          "date": "2026-02-01",
+          "pages": 100
+        },
+        {
+          "id": "l6",
+          "date": "2026-02-14",
+          "pages": 250
+        },
+        {
+          "id": "l7",
+          "date": "2026-03-02",
+          "pages": 338
+        }
+      ],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 1,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b3",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "summary": "",
+      "genres": [
+        "Classic",
+        "Romance"
+      ],
+      "pages": 432,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#8A3B3B",
+        "style": "frame",
+        "url": ""
+      },
+      "status": "finished",
+      "priority": "Want to Read",
+      "startDate": "2026-04-03",
+      "finishDate": "2026-04-27",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 4,
+        "text": "Witty as ever. Re-read on a rainy month.",
+        "scores": {
+          "plot": 4,
+          "characters": 5,
+          "writing": 5,
+          "pacing": 3,
+          "world": 3
+        }
+      },
+      "moods": [
+        "Romantic",
+        "Funny"
+      ],
+      "tropes": [],
+      "spice": 1,
+      "tears": 0,
+      "currency": "GBP",
+      "price": 6.99,
+      "favorite": true,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [
+        {
+          "id": "l8",
+          "date": "2026-04-03",
+          "pages": 120
+        },
+        {
+          "id": "l9",
+          "date": "2026-04-15",
+          "pages": 150
+        },
+        {
+          "id": "l10",
+          "date": "2026-04-27",
+          "pages": 162
+        }
+      ],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 2,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b4",
+      "title": "Project Hail Mary",
+      "author": "Andy Weir",
+      "summary": "",
+      "genres": [
+        "Sci-Fi"
+      ],
+      "pages": 476,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#0E7490",
+        "style": "circle",
+        "url": ""
+      },
+      "status": "finished",
+      "priority": "Want to Read",
+      "startDate": "2026-06-02",
+      "finishDate": "2026-06-20",
+      "readWhere": "Online",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 5,
+        "text": "Rocky is the best character of the decade.",
+        "scores": {
+          "plot": 5,
+          "characters": 5,
+          "writing": 4,
+          "pacing": 5,
+          "world": 4
+        }
+      },
+      "moods": [
+        "Funny",
+        "Hopeful",
+        "Tense"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 2,
+      "currency": "SGD",
+      "price": 18.5,
+      "favorite": false,
+      "quotes": [
+        {
+          "id": "q4",
+          "text": "Fist my bump.",
+          "page": 330,
+          "date": "2026-06-14"
+        }
+      ],
+      "notes": [],
+      "readingLog": [
+        {
+          "id": "l11",
+          "date": "2026-06-02",
+          "pages": 90
+        },
+        {
+          "id": "l12",
+          "date": "2026-06-10",
+          "pages": 200
+        },
+        {
+          "id": "l13",
+          "date": "2026-06-20",
+          "pages": 186
+        }
+      ],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 1,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b5",
+      "title": "Circe",
+      "author": "Madeline Miller",
+      "summary": "",
+      "genres": [
+        "Fantasy",
+        "Historical"
+      ],
+      "pages": 393,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#2F5D50",
+        "style": "diagonal",
+        "url": ""
+      },
+      "status": "finished",
+      "priority": "Want to Read",
+      "startDate": "2026-08-05",
+      "finishDate": "2026-08-24",
+      "readWhere": "Subscription",
+      "sourceNote": "Kindle Unlimited",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 4,
+        "text": "Lyrical retelling with real bite.",
+        "scores": {
+          "plot": 4,
+          "characters": 5,
+          "writing": 5,
+          "pacing": 3,
+          "world": 4
+        }
+      },
+      "moods": [
+        "Dark",
+        "Reflective"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 1,
+      "currency": "EUR",
+      "price": 9.99,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [
+        {
+          "id": "l14",
+          "date": "2026-08-05",
+          "pages": 130
+        },
+        {
+          "id": "l15",
+          "date": "2026-08-15",
+          "pages": 140
+        },
+        {
+          "id": "l16",
+          "date": "2026-08-24",
+          "pages": 123
+        }
+      ],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 1,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b6",
+      "title": "The Name of the Wind",
+      "author": "Patrick Rothfuss",
+      "summary": "The tale of Kvothe, told in his own words.",
+      "genres": [
+        "Fantasy"
+      ],
+      "pages": 662,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 241,
+      "cover": {
+        "color": "#4B3F72",
+        "style": "frame",
+        "url": ""
+      },
+      "status": "reading",
+      "priority": "Want to Read",
+      "startDate": "2026-10-28",
+      "finishDate": "",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "The Kingkiller Chronicle",
+      "seriesNumber": 1,
+      "seriesTotal": 3,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Whimsical",
+        "Adventurous"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "MYR",
+      "price": 55,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [
+        {
+          "id": "l17",
+          "date": "2026-11-18",
+          "pages": 40
+        },
+        {
+          "id": "l18",
+          "date": "2026-11-20",
+          "pages": 55
+        }
+      ],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b7",
+      "title": "Piranesi",
+      "author": "Susanna Clarke",
+      "summary": "",
+      "genres": [
+        "Fantasy",
+        "Literary"
+      ],
+      "pages": 272,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 90,
+      "cover": {
+        "color": "#3F4B5B",
+        "style": "stripes",
+        "url": ""
+      },
+      "status": "reading",
+      "priority": "Want to Read",
+      "startDate": "2026-11-10",
+      "finishDate": "",
+      "readWhere": "Borrowed / Library",
+      "sourceNote": "Due back soon",
+      "returnDate": "2026-12-05",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Reflective",
+        "Whimsical"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "GBP",
+      "price": 0,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.100Z"
+    },
+    {
+      "id": "b8",
+      "title": "Tomorrow, and Tomorrow, and Tomorrow",
+      "author": "Gabrielle Zevin",
+      "summary": "",
+      "genres": [
+        "Literary"
+      ],
+      "pages": 416,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#C2410C",
+        "style": "diagonal",
+        "url": ""
+      },
+      "status": "bought",
+      "priority": "Want to Read",
+      "startDate": "",
+      "finishDate": "",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Heartbreaking",
+        "Reflective"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "SGD",
+      "price": 22.9,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.101Z"
+    },
+    {
+      "id": "b9",
+      "title": "The Sunday Morning Murders",
+      "author": "Eliza Hart",
+      "summary": "",
+      "genres": [
+        "Mystery"
+      ],
+      "pages": 340,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#6B7280",
+        "style": "circle",
+        "url": ""
+      },
+      "status": "bought",
+      "priority": "Want to Read",
+      "startDate": "",
+      "finishDate": "",
+      "readWhere": "Gifted",
+      "sourceNote": "From Aunt Lin",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Cozy",
+        "Tense"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "MYR",
+      "price": 0,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.101Z"
+    },
+    {
+      "id": "b10",
+      "title": "Babel",
+      "author": "R. F. Kuang",
+      "summary": "",
+      "genres": [
+        "Fantasy",
+        "Historical"
+      ],
+      "pages": 545,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#7C6F64",
+        "style": "frame",
+        "url": ""
+      },
+      "status": "bought",
+      "priority": "Want to Read",
+      "startDate": "",
+      "finishDate": "",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Dark",
+        "Reflective"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "USD",
+      "price": 18.99,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.101Z"
+    },
+    {
+      "id": "b11",
+      "title": "Klara and the Sun",
+      "author": "Kazuo Ishiguro",
+      "summary": "",
+      "genres": [
+        "Sci-Fi",
+        "Literary"
+      ],
+      "pages": 303,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#B8860B",
+        "style": "circle",
+        "url": ""
+      },
+      "status": "wishlist",
+      "priority": "Must Read",
+      "startDate": "",
+      "finishDate": "",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Reflective"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "EUR",
+      "price": 14,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.101Z"
+    },
+    {
+      "id": "b12",
+      "title": "Braiding Sweetgrass",
+      "author": "Robin Wall Kimmerer",
+      "summary": "",
+      "genres": [
+        "Non-fiction"
+      ],
+      "pages": 391,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#2F5D50",
+        "style": "stripes",
+        "url": ""
+      },
+      "status": "wishlist",
+      "priority": "Someday",
+      "startDate": "",
+      "finishDate": "",
+      "readWhere": "Owned",
+      "sourceNote": "",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "USD",
+      "price": 17,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-22T22:55:07.101Z"
+    }
+  ],
+  "collections": [
+    {
+      "id": "col1",
+      "name": "Comfort Reads",
+      "type": "custom",
+      "bookIds": [
+        "b1",
+        "b3",
+        "b9"
+      ]
+    },
+    {
+      "id": "col2",
+      "name": "Five-Star Club",
+      "type": "smart",
+      "rule": "rating5",
+      "bookIds": []
+    },
+    {
+      "id": "col3",
+      "name": "Library Loans",
+      "type": "smart",
+      "rule": "borrowed",
+      "bookIds": []
+    }
+  ],
+  "challenges": [
+    {
+      "id": "ch1",
+      "name": "Read 12 books",
+      "kind": "books",
+      "target": 12,
+      "year": 2026
+    },
+    {
+      "id": "ch2",
+      "name": "5,000 pages",
+      "kind": "pages",
+      "target": 5000,
+      "year": 2026
+    },
+    {
+      "id": "ch3",
+      "name": "Genre explorer (6 genres)",
+      "kind": "genres",
+      "target": 6,
+      "year": 2026
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "Return Piranesi to the library",
+      "done": false
+    },
+    {
+      "id": "t2",
+      "text": "Update the wishlist before the book fair",
+      "done": false
+    }
+  ],
+  "readDays": [
+    "2026-11-22",
+    "2026-11-21"
+  ],
+  "pausedDays": [],
+  "planned": [],
+  "settings": {
+    "name": "Reader",
+    "theme": "ttpd",
+    "mode": "light",
+    "goalBooks": 24,
+    "goalPages": 8000,
+    "primaryCurrency": "MYR",
+    "rates": {
+      "USD": 1,
+      "MYR": 4.45,
+      "SGD": 1.34,
+      "GBP": 0.79,
+      "EUR": 0.92,
+      "JPY": 150,
+      "AUD": 1.52,
+      "CAD": 1.37,
+      "CNY": 7.2,
+      "INR": 83.2,
+      "IDR": 15700,
+      "THB": 35.5,
+      "KRW": 1340,
+      "HKD": 7.8,
+      "NZD": 1.65,
+      "CHF": 0.88,
+      "PHP": 56
+    },
+    "ratesUpdated": null,
+    "visitorPublicEnabled": true,
+    "pixelIcon": "heart"
+  },
+  "badgesSeen": [],
+  "tournament": null
+}
