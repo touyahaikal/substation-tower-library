@@ -2,6 +2,16 @@
 const API = 'https://api.github.com'
 export const SYNC_MESSAGE = 'chore: sync book tracker data [skip ci]'
 
+// fetch wrapper: a bare "Failed to fetch" means the browser never reached GitHub
+const rawFetch = window.fetch.bind(window)
+const fetch = async (...a) => {
+  try {
+    return await rawFetch(...a)
+  } catch (e) {
+    throw new Error('Could not reach GitHub from the browser (' + (e.message || 'network error') + '). Check your connection and disable ad/privacy blockers for this site, then try again.')
+  }
+}
+
 const headers = (token) => ({
   Accept: 'application/vnd.github+json',
   'X-GitHub-Api-Version': '2022-11-28',
@@ -45,7 +55,7 @@ export async function checkRepo(token, owner, repo) {
 
 // GET /repos/{owner}/{repo}/contents/{path}?ref={branch}  → { data, sha } or null when the file doesn't exist yet
 export async function readFile(c) {
-  const res = await fetch(`${fileUrl(c)}?ref=${encodeURIComponent(c.branch)}`, { headers: { ...headers(c.token), 'Cache-Control': 'no-cache' }, cache: 'no-store' })
+  const res = await fetch(`${fileUrl(c)}?ref=${encodeURIComponent(c.branch)}`, { headers: headers(c.token), cache: 'no-store' })
   if (res.status === 404) return null
   if (!res.ok) await fail(res, 'Could not read library file')
   const j = await res.json()
