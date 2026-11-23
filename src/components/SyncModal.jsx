@@ -80,7 +80,7 @@ export function SyncPanel({ onDone }) {
             <span className="block text-xs text-muted">Visitors load <span className="font-mono">{admin.path}</span> straight from your public repository. Switch off to hide it.</span>
           </span>
         </label>
-        <button className="btn" onClick={() => { if (logout()) onDone && onDone() }}><LogOut size={14} /> Log out / clear token</button>
+        <button className="btn" onClick={async () => { if (await logout()) onDone && onDone() }}><LogOut size={14} /> Log out / clear token</button>
       </div>
     )
   }

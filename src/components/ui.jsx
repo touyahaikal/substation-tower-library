@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { X, Star } from 'lucide-react'
-import { progressOf } from '../lib/utils.js'
+import { progressOf, volumeText } from '../lib/utils.js'
 
 export function Modal({ title, onClose, children, wide, footer }) {
   useEffect(() => {
@@ -41,15 +41,18 @@ export function Cover({ book, size = 'md', className = '', onClick }) {
     <div
       onClick={onClick}
       className={`book-cover ${dims} shrink-0 rounded-sm ${onClick ? 'cursor-pointer hover:-translate-y-0.5 transition' : ''} ${className}`}
-      style={{ background: c.url ? `center/cover url(${c.url})` : `${pattern}, ${color}` }}
-      title={book.title}
+      style={{ background: c.url ? `center/cover url("${c.url}")` : `${pattern}, ${color}` }}
+      title={book.title + (volumeText(book) ? ' · ' + volumeText(book) : '')}
     >
       {!c.url && showText && (
         <div className={`absolute inset-0 pl-[12%] pr-2 py-2 flex flex-col justify-between text-white ${c.style === 'frame' ? 'm-1.5 border border-white/50' : ''}`}>
           <div className={`h-display font-bold leading-tight ${size === 'sm' ? 'text-[9px]' : 'text-sm'}`} style={{ textShadow: '0 1px 2px rgb(0 0 0 / .35)' }}>
             {book.title}
           </div>
-          <div className={`font-mono opacity-90 ${size === 'sm' ? 'text-[7px]' : 'text-[10px]'}`}>{book.author}</div>
+          <div>
+            {book.volume != null && book.volume !== '' && <div className={`font-mono font-bold ${size === 'sm' ? 'text-[8px]' : 'text-xs'}`}>Vol. {book.volume}</div>}
+            <div className={`font-mono opacity-90 ${size === 'sm' ? 'text-[7px]' : 'text-[10px]'}`}>{book.author}</div>
+          </div>
         </div>
       )}
     </div>
@@ -144,5 +147,55 @@ export function Field({ label, children, className = '' }) {
       <span className="label">{label}</span>
       {children}
     </label>
+  )
+}
+
+// 0-100 rating: slider + direct number input
+export function RatingInput({ value, onChange }) {
+  const v = Number(value) || 0
+  const set = (x) => onChange(Math.max(0, Math.min(100, Math.round(Number(x) || 0))))
+  return (
+    <div className="flex items-center gap-3">
+      <input type="range" min="0" max="100" step="1" value={v} onChange={(e) => set(e.target.value)} className="flex-1 accent-[rgb(var(--accent))]" aria-label="Rating 0 to 100" />
+      <input className="input !w-20 text-center font-mono" type="number" min="0" max="100" value={value === '' ? '' : v} onChange={(e) => (e.target.value === '' ? onChange(0) : set(e.target.value))} aria-label="Rating number" />
+      <span className="text-xs text-muted font-mono">/100</span>
+    </div>
+  )
+}
+
+export function RatingBadge({ value }) {
+  const v = Number(value) || 0
+  if (!v) return <span className="text-xs text-muted font-mono">unrated</span>
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-mono">
+      <Star size={12} className="text-accent fill-accent" /> {v}<span className="text-muted">/100</span>
+    </span>
+  )
+}
+
+// Dropdown of known options plus a "Custom…" choice that reveals a text box
+export function SelectCustom({ value, onChange, options, placeholder = 'Type your own' }) {
+  const known = options.includes(value)
+  const [custom, setCustom] = useState(!known && !!value)
+  return (
+    <div className="space-y-1.5">
+      <select
+        className="input"
+        value={custom ? '__custom' : value}
+        onChange={(e) => {
+          if (e.target.value === '__custom') {
+            setCustom(true)
+            onChange('')
+          } else {
+            setCustom(false)
+            onChange(e.target.value)
+          }
+        }}
+      >
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        <option value="__custom">Custom…</option>
+      </select>
+      {custom && <input className="input" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} autoFocus />}
+    </div>
   )
 }

@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { sampleBooks, sampleCollections, defaultSettings, sampleChallenges, sampleTasks } from './sampleData.js'
 import { DEFAULT_RATES } from './currency.js'
-import { uid, todayStr, blankBook } from './utils.js'
+import { uid, todayStr, blankBook, migrateBook, syncYears, SCHEMA_VERSION, unitTotal } from './utils.js'
+import { titleKey } from './groups.js'
 import * as gh from './github.js'
 
 const Ctx = createContext(null)
@@ -12,7 +13,8 @@ export const useStore = () => useContext(Ctx)
 const SS_ADMIN = 'bt.admin.session'
 
 const freshData = () => ({
-  books: sampleBooks(),
+  schemaV: SCHEMA_VERSION,
+  books: sampleBooks().map((b) => migrateBook(b, 1)),
   collections: sampleCollections(),
   challenges: sampleChallenges(),
   tasks: sampleTasks(),
@@ -32,22 +34,60 @@ const loadAdmin = () => {
   }
 }
 
+// What changes on a book when its status changes (dates + year fields stay in step)
+const statusPatch = (b, status, extra = {}) => {
+  const p = { status, ...extra }
+  const t = todayStr()
+  const y = new Date().getFullYear()
+  if (status === 'bought' && !b.yearBought && b.status === 'wishlist') p.yearBought = y
+  if (status === 'reading') {
+    if (!b.startDate) {
+      p.startDate = t
+      p.yearStarted = y
+    }
+    if (b.status === 'finished') {
+      p.currentPage = 0
+      p.finishDate = ''
+      p.yearFinished = ''
+      p.startDate = t
+      p.yearStarted = y
+    }
+  }
+  if (status === 'finished') {
+    p.finishDate = t
+    p.yearFinished = y
+    p.reads = (b.reads || 0) + (b.status === 'finished' ? 0 : 1)
+    p.currentPage = unitTotal(b) || b.currentPage || 0
+  }
+  return p
+}
+
 export function StoreProvider({ children }) {
   const [data, setData] = useState(freshData)
   const [admin, setAdmin] = useState(loadAdmin) // {token, login, avatar, owner, repo, branch, path}
   const [syncState, setSyncState] = useState('idle') // idle | synced | syncing | dirty | error
   const [syncError, setSyncError] = useState('')
   const [readOnly, setReadOnly] = useState(false)
-  const [toast, setToast] = useState('')
+  const [toast, setToast] = useState(null) // {id, msg, kind}
+  const [confirmReq, setConfirmReq] = useState(null) // in-page confirmation dialog (never window.confirm)
+  const toastTimer = useRef(null)
   const dirtyRef = useRef(false)
   const timer = useRef(null)
   const dataRef = useRef(data)
   dataRef.current = data
 
-  const flash = useCallback((m) => {
-    setToast(m)
-    setTimeout(() => setToast(''), 2600)
+  const flash = useCallback((msg, kind = 'info') => {
+    setToast({ id: Date.now(), msg, kind })
+    clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), kind === 'error' ? 5000 : 2800)
   }, [])
+
+  // ask({title, message, confirmLabel, danger}) -> Promise<boolean>, rendered as an in-app dialog
+  const ask = useCallback((opts) => new Promise((resolve) => setConfirmReq({ ...opts, resolve })), [])
+  const answerConfirm = (v) => {
+    if (confirmReq) confirmReq.resolve(v)
+    setConfirmReq(null)
+  }
 
   // Theme attributes on <html>
   useEffect(() => {
@@ -71,7 +111,8 @@ export function StoreProvider({ children }) {
     const base = freshData()
     // theme + mode are per-visit display choices: keep what is on screen
     const { theme, mode } = dataRef.current.settings
-    setData({ ...base, ...remote, settings: { ...base.settings, ...(remote.settings || {}), theme, mode, rates: { ...DEFAULT_RATES, ...((remote.settings || {}).rates || {}) } } })
+    const ver = remote.schemaV || 1
+    setData({ ...base, ...remote, schemaV: SCHEMA_VERSION, books: (remote.books || []).map((b) => migrateBook(b, ver)), settings: { ...base.settings, ...(remote.settings || {}), theme, mode, rates: { ...DEFAULT_RATES, ...((remote.settings || {}).rates || {}) } } })
   }
 
   // Commit the current data (PUT with the latest sha). Edits made while a save is running are picked up by the same loop.
@@ -112,7 +153,7 @@ export function StoreProvider({ children }) {
   const reload = useCallback(async (silent) => {
     const a = adminRef.current
     if (!a) return
-    if (silent !== true && dirtyRef.current && !window.confirm('You have changes that are not saved yet. Reload from GitHub and discard them?')) return
+    if (silent !== true && dirtyRef.current && !(await ask({ title: 'Discard unsaved changes?', message: 'You have changes that are not saved to GitHub yet. Reloading replaces them with the file on GitHub.', confirmLabel: 'Reload and discard', danger: true }))) return
     loadingRef.current = true
     setSyncState('loading')
     try {
@@ -157,8 +198,8 @@ export function StoreProvider({ children }) {
     return { ...user, note }
   }
 
-  const logout = () => {
-    if (dirtyRef.current && !window.confirm('You have changes that are not saved to GitHub yet. Log out anyway?')) return false
+  const logout = async () => {
+    if (dirtyRef.current && !(await ask({ title: 'Log out with unsaved changes?', message: 'Some changes have not reached GitHub yet. Logging out will lose them.', confirmLabel: 'Log out anyway', danger: true }))) return false
     try {
       sessionStorage.removeItem(SS_ADMIN)
     } catch {}
@@ -246,18 +287,20 @@ export function StoreProvider({ children }) {
   }
 
   // Mutate helper — blocks edits in read-only visitor mode
+  // returns true when the change was applied (false when blocked, e.g. read-only view)
   const mutate = useCallback(
     (fn) => {
       if (readOnly) {
-        flash('Read-only view — log in as Admin to edit')
-        return
+        flash('Read-only view — log in as Admin to edit', 'error')
+        return false
       }
       if (loadingRef.current) {
-        flash('Still loading from GitHub — try again in a moment')
-        return
+        flash('Still loading from GitHub — try again in a moment', 'error')
+        return false
       }
       dirtyRef.current = true
       setData((d) => fn(d))
+      return true
     },
     [readOnly, flash]
   )
@@ -274,28 +317,42 @@ export function StoreProvider({ children }) {
       return { ...d, books, readDays: d.readDays.includes(date) ? d.readDays : [...d.readDays, date] }
     }
     return {
-      addBook: (book) => mutate((d) => ({ ...d, books: [{ ...blankBook(), ...book }, ...d.books] })),
-      addBooks: (list) => mutate((d) => ({ ...d, books: [...list.map((b) => ({ ...blankBook(), ...b })), ...d.books] })),
+      addBook: (book) => mutate((d) => ({ ...d, books: [syncYears({ ...blankBook(), ...book }), ...d.books] })),
+      addBooks: (list) => mutate((d) => ({ ...d, books: [...list.map((b) => syncYears({ ...blankBook(), ...b })), ...d.books] })),
       updateBook: patchBook,
       deleteBooks: (ids) => mutate((d) => ({ ...d, books: d.books.filter((b) => !ids.includes(b.id)) })),
-      setStatus: (id, status, extra = {}) =>
-        patchBook(id, (b) => {
-          const p = { status, ...extra }
-          if (status === 'reading' && !b.startDate) p.startDate = todayStr()
-          if (status === 'reading' && b.status === 'finished') {
-            p.currentPage = 0
-            p.finishDate = ''
-            p.startDate = todayStr()
-          }
-          if (status === 'finished') {
-            p.finishDate = todayStr()
-            p.reads = (b.reads || 0) + (b.status === 'finished' ? 0 : 1)
-            p.currentPage = b.unit === 'Minutes' ? b.audioMinutes : b.unit === 'Percent' ? 100 : b.pages
-          }
-          return p
+      setHidden: (ids, hidden) => mutate((d) => ({ ...d, books: d.books.map((b) => (ids.includes(b.id) ? { ...b, hidden } : b)) })),
+      setStatus: (id, status, extra = {}) => patchBook(id, (b) => statusPatch(b, status, extra)),
+      // one commit for many entries (e.g. Volumes 1-25 -> Finished)
+      bulkSetStatus: (ids, status) =>
+        mutate((d) => ({ ...d, books: d.books.map((b) => (ids.includes(b.id) ? { ...b, ...statusPatch(b, status) } : b)) })),
+      // the series cover is whichever volume of the title has isSeriesCover
+      setSeriesCover: (id) =>
+        mutate((d) => {
+          const me = d.books.find((b) => b.id === id)
+          if (!me) return d
+          const k = titleKey(me.title)
+          return { ...d, books: d.books.map((b) => (titleKey(b.title) === k ? { ...b, isSeriesCover: b.id === id } : b)) }
+        }),
+      // explicit "Save" of a page number: finishes at the last page, starts reading otherwise
+      savePage: (id, value) =>
+        mutate((d) => {
+          const b = d.books.find((x) => x.id === id)
+          if (!b) return d
+          const total = unitTotal(b) || 0
+          let page = Math.max(0, Number(value) || 0)
+          if (total) page = Math.min(page, total)
+          const delta = page - (Number(b.currentPage) || 0)
+          let patch = { currentPage: page }
+          if (total > 0 && page >= total) patch = { ...statusPatch(b, 'finished'), currentPage: page }
+          else if (page > 0 && (b.status === 'wishlist' || b.status === 'bought')) patch = { ...statusPatch(b, 'reading'), currentPage: page }
+          else if (page > 0 && b.status === 'finished') patch = { ...statusPatch(b, 'reading'), currentPage: page }
+          const t = todayStr()
+          const books = d.books.map((x) => (x.id !== id ? x : { ...x, ...patch, readingLog: delta > 0 ? [...x.readingLog, { id: uid(), date: t, pages: delta }] : x.readingLog }))
+          return { ...d, books, readDays: delta > 0 && !d.readDays.includes(t) ? [...d.readDays, t] : d.readDays }
         }),
       readAgain: (id) =>
-        patchBook(id, (b) => ({ status: 'reading', currentPage: 0, startDate: todayStr(), finishDate: '', review: { ...b.review } })),
+        patchBook(id, (b) => ({ status: 'reading', currentPage: 0, startDate: todayStr(), yearStarted: new Date().getFullYear(), finishDate: '', yearFinished: '', review: { ...b.review } })),
       setCurrentPage: (id, val) => patchBook(id, (b) => ({ currentPage: Math.max(0, Number(val) || 0) })),
       logReading: (bookId, pages, date) => mutate((d) => logPages(d, bookId, pages, date)),
       quickRead: () => mutate((d) => ({ ...d, readDays: d.readDays.includes(todayStr()) ? d.readDays : [...d.readDays, todayStr()] })),
@@ -336,6 +393,9 @@ export function StoreProvider({ children }) {
     switchToLocalCopy,
     flash,
     toast,
+    ask,
+    confirmReq,
+    answerConfirm,
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

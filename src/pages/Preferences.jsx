@@ -9,7 +9,7 @@ import { CURRENCIES, DEFAULT_RATES, fetchLiveRates } from '../lib/currency.js'
 import { downloadJSON } from '../lib/utils.js'
 
 export default function Preferences() {
-  const { settings, actions, data, admin, syncState, flash } = useStore()
+  const { settings, actions, data, admin, syncState, flash, ask } = useStore()
   const { setSyncOpen } = useNav()
   const [busy, setBusy] = useState(false)
   const file = useRef(null)
@@ -31,7 +31,7 @@ export default function Preferences() {
     const f = e.target.files?.[0]
     if (!f) return
     const r = new FileReader()
-    r.onload = () => { try { actions.importData(JSON.parse(r.result)); flash('Library imported') } catch (err) { alert(err.message) } }
+    r.onload = () => { try { actions.importData(JSON.parse(r.result)); flash('Library imported', 'success') } catch (err) { flash(err.message || 'That file is not a valid library', 'error') } }
     r.readAsText(f)
     e.target.value = ''
   }
@@ -91,7 +91,7 @@ export default function Preferences() {
             <button className="btn" onClick={() => downloadJSON(data, `reading-journal-${new Date().toISOString().slice(0, 10)}.json`)}><Download size={14} /> Export JSON</button>
             <button className="btn" onClick={() => file.current?.click()}><Upload size={14} /> Import JSON</button>
             <input ref={file} type="file" accept="application/json" className="hidden" onChange={importFile} />
-            <button className="btn" onClick={() => confirm('Reset to the demo library? This replaces your books on this device.') && actions.resetDemo()}><RotateCcw size={14} /> Reset demo data</button>
+            <button className="btn" onClick={async () => { if (await ask({ title: 'Reset to demo library?', message: 'This replaces every book, log and task with the demo library. If you are logged in, it will be saved to GitHub too.', confirmLabel: 'Yes, reset', danger: true })) { actions.resetDemo(); flash('Demo library restored', 'success') } }}><RotateCcw size={14} /> Reset demo data</button>
           </div>
         </Card>
       </div>

@@ -3,17 +3,27 @@ import { Layers } from 'lucide-react'
 import { PageTitle, Cover, Card, Empty } from '../components/ui.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
+import SeriesCard from '../components/SeriesCard.jsx'
+import { buildGroups } from '../lib/groups.js'
 
 export default function Series() {
   const { books } = useStore()
   const { openBook } = useNav()
+  const volumeGroups = buildGroups(books.filter((b) => !b.hidden)).filter((g) => g.isCollection).sort((a, b) => a.title.localeCompare(b.title))
   const groups = {}
   books.filter((b) => b.series).forEach((b) => (groups[b.series] = [...(groups[b.series] || []), b]))
   const names = Object.keys(groups).sort()
   return (
     <>
       <PageTitle sub="Track how far you are through each series">Series</PageTitle>
-      {names.length === 0 && <Empty icon={Layers}>No series yet. Add a series name when editing a book.</Empty>}
+      {volumeGroups.length > 0 && (
+        <div className="space-y-4 mb-8">
+          <div className="label">Volumes &amp; editions</div>
+          {volumeGroups.map((g) => <SeriesCard key={g.key} group={g} defaultOpen />)}
+        </div>
+      )}
+      {volumeGroups.length === 0 && names.length === 0 && <Empty icon={Layers}>No series yet. Use “Add volumes” on any entry in the Library to turn it into a series.</Empty>}
+      {names.length > 0 && <div className="label mb-2">Reading-order series</div>}
       <div className="grid md:grid-cols-2 gap-4">
         {names.map((n) => {
           const list = groups[n].sort((a, b) => (a.seriesNumber || 0) - (b.seriesNumber || 0))

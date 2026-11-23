@@ -77,7 +77,7 @@ export default function Header() {
       </div>
       <SyncBadge />
       <button className="btn btn-primary" onClick={() => setBookModal({})}>
-        <Plus size={16} /> <span className="hidden sm:inline">Add a book</span>
+        <Plus size={16} /> <span className="hidden sm:inline">New entry</span>
       </button>
     </header>
   )

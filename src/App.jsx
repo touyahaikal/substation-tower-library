@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import { Menu } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Plus, CheckCircle2, AlertTriangle, Info } from 'lucide-react'
+import { ConfirmHost } from './components/Confirm.jsx'
 import { NavProvider, useNav } from './lib/nav.jsx'
 import { useStore } from './lib/store.jsx'
 import Sidebar from './components/Sidebar.jsx'
@@ -30,9 +31,24 @@ const PAGES = {
 
 function Shell() {
   const { page, bookModal, setBookModal, syncOpen, setSyncOpen, timer, openBook } = useNav()
-  const { toast, readOnly, admin, switchToLocalCopy } = useStore()
+  const { toast, readOnly, admin, switchToLocalCopy, confirmReq } = useStore()
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 900)
   const Page = PAGES[page] || Home
+
+  // "N" opens the New entry modal (ignored while typing in a field or while a dialog is already open)
+  useEffect(() => {
+    const h = (e) => {
+      if ((e.key !== 'n' && e.key !== 'N') || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return
+      const t = e.target
+      const tag = ((t && t.tagName) || '').toLowerCase()
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (t && t.isContentEditable)) return
+      if (bookModal || syncOpen || confirmReq) return
+      e.preventDefault()
+      setBookModal({})
+    }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [bookModal, syncOpen, confirmReq, setBookModal])
   return (
     <div className="h-full flex">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -49,7 +65,7 @@ function Shell() {
             Guest mode: changes live only in this tab and vanish on refresh. Use <b>Admin Sync</b> to save your library to GitHub.
           </div>
         )}
-        <main className={`flex-1 overflow-y-auto px-3 sm:px-6 py-5 ${timer ? 'pb-28' : ''}`}>
+        <main className={`flex-1 overflow-y-auto px-3 sm:px-6 pt-5 ${timer ? 'pb-40' : 'pb-24'}`}>
           <div className="max-w-6xl mx-auto">
             <Page />
           </div>
@@ -67,8 +83,26 @@ function Shell() {
       )}
       {syncOpen && <SyncModal onClose={() => setSyncOpen(false)} />}
       <TimerDock />
+      {!bookModal && (
+        <button
+          className={`btn btn-primary fixed right-4 sm:right-6 ${timer ? 'bottom-24' : 'bottom-4 sm:bottom-6'} z-40 !rounded-full !px-4 !py-3 shadow-lg`}
+          onClick={() => setBookModal({})}
+          title="New entry (press N)"
+          aria-label="New entry"
+        >
+          <Plus size={18} /> <span className="font-semibold">New entry</span>
+        </button>
+      )}
+      <ConfirmHost />
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] panel px-4 py-2 text-sm shadow-lg">{toast}</div>
+        <div
+          key={toast.id}
+          role={toast.kind === 'error' ? 'alert' : 'status'}
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-[70] panel px-4 py-2.5 text-sm shadow-xl max-w-[92vw] flex items-center gap-2 ${toast.kind === 'error' ? '!border-red-500 text-red-500' : toast.kind === 'success' ? '!border-accent2' : ''}`}
+        >
+          {toast.kind === 'error' ? <AlertTriangle size={16} className="shrink-0" /> : toast.kind === 'success' ? <CheckCircle2 size={16} className="shrink-0 text-accent2" /> : <Info size={16} className="shrink-0" />}
+          <span>{toast.msg}</span>
+        </div>
       )}
     </div>
   )

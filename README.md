@@ -9,10 +9,11 @@ Vite + React + Tailwind + Lucide. Deploys to GitHub Pages and saves your library
 3. On the empty repo page click **uploading an existing file** (or **Add file → Upload files**).
 4. Open the unzipped folder and drag **everything inside it** (not the zip itself, not the outer folder) into the browser: `src`, `public`, `index.html`, `package.json`, `vite.config.js`, `postcss.config.js`, `tailwind.config.js`, `README.md`.
    - Dragging folders keeps their sub-folders. Wait until every file shows in the list, then click **Commit changes**.
-5. **The hidden `.github` folder:** some computers hide it and it may not get picked up. After the upload, check that `.github/workflows/deploy.yml` exists in the repo. If not: **Add file → Create new file**, type the name `.github/workflows/deploy.yml` (typing the `/` creates the folders), paste the contents of `DEPLOY-WORKFLOW.yml.txt` from the zip, and commit.
-6. Go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
-7. Open the **Actions** tab. The build (`npm install` + `npm run build`) runs on GitHub's servers by itself and takes about a minute. When it's green, your site is live at `https://<username>.github.io/<repo-name>/`. If the first run happened before step 6 and failed at "deploy", click the run → **Re-run all jobs**.
-8. To change anything later, edit or upload files on github.com (**Add file → Upload files**, or the pencil icon on a file). Each commit to `main` rebuilds the site automatically. There is no lockfile to maintain: the workflow uses `npm install`.
+5. **Check the `src` folder arrived.** If the build fails with “Rollup failed to resolve import /src/main.jsx”, the `src` folder was not uploaded. Upload `src` again (drag the folder itself), and make sure `src/main.jsx`, `src/pages/` and `src/components/` show up in the repo.
+6. **The hidden `.github` folder:** some computers hide it and it may not get picked up. After the upload, check that `.github/workflows/deploy.yml` exists in the repo. If not: **Add file → Create new file**, type the name `.github/workflows/deploy.yml` (typing the `/` creates the folders), paste the contents of `DEPLOY-WORKFLOW.yml.txt` from the zip, and commit.
+7. Go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
+8. Open the **Actions** tab. The build (`npm install` + `npm run build`) runs on GitHub's servers by itself and takes about a minute. When it's green, your site is live at `https://<username>.github.io/<repo-name>/`. If the first run happened before step 6 and failed at "deploy", click the run → **Re-run all jobs**.
+9. To change anything later, edit or upload files on github.com (**Add file → Upload files**, or the pencil icon on a file). Each commit to `main` rebuilds the site automatically. There is no lockfile to maintain: the workflow uses `npm install`.
 
 ## 2. Nothing is stored on your computer
 
@@ -59,6 +60,17 @@ Anyone who opens the site without logging in sees **Guest Mode**. The app loads 
 - The token lives in `sessionStorage` (this tab only), is sent only to `api.github.com`, and is never written into the JSON file.
 - Scope it to one repository with Contents read/write only, and give it an expiry.
 - Because the repo is public, your library data is public too.
+
+## Library, series & entry features
+
+- **New entry:** header button, a floating **+ New entry** button on every page, or press **N** (when you aren't typing in a field). Saving always gives feedback: a red toast and a highlighted Title if it's missing, or *Saved 'Title' to library*.
+- **Fields:** title, author, genres (comma-separated plus tap-to-toggle pills), language, edition/format (dropdown + custom), total/current page, status (Wishlist / Bought / Currently Reading / Finished), rating 0–100 (slider + number), price with currency, notes, and year released / bought / started / finished.
+- **Covers:** paste a URL or upload a file. Uploads are resized on a canvas to max 400 px wide and saved as WebP (JPEG fallback, quality 0.8), typically 5–30 KB, so `library.json` stays small.
+- **Library:** live search (title, author, genre, language, notes), sort (Newest, Title, Author, Progress, Rating, Year released), filters (genre, language, status tabs) and a **Show Hidden** switch. Layouts: **Cards**, **List**, **Covers** (tap a poster to expand it inline; **Collapse** / **Collapse All**).
+- **Quick page update:** type a page or tap −10 / −1 / +1 / +10, then **Save**. Reaching the last page marks it Finished; any progress on a Wishlist/Bought entry starts it.
+- **No browser popups:** deleting and bulk actions use in-page confirmations (an inline *Confirm Delete?* bar or an in-app dialog) and toasts. `window.confirm` / `window.alert` are never used.
+- **Series:** **Add volumes** turns any single entry into Volume 1 and opens the generator (range such as 1–70, plus extras like `0` = Prologue, `0.5` = Special Prologue, or any decimal). Volumes always sort 0, 0.5, 1, 2… The series card shows overall progress, a status-coloured volume grid, **Set as Series Cover**, bulk status for a range, add more volumes, hide/unhide and delete.
+- **Same title, different editions** (e.g. Manga, Light Novel, Databook) merge into one card. The edition with the most volumes (ties: most pages) is the main one; the rest appear under **Other formats**, separated by dashed lines.
 
 ## 6. Exchange rates
 

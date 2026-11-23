@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { Share2, Check, Plus, Download } from 'lucide-react'
-import { PageTitle, Card, Modal, Tabs, Stars, Field, Empty } from '../components/ui.jsx'
+import { PageTitle, Card, Modal, Tabs, RatingBadge, Field, Empty } from '../components/ui.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
 import { uid } from '../lib/utils.js'
@@ -97,7 +97,7 @@ export default function Journal() {
         )))}
 
         {tab === 'reviews' && (reviews.length === 0 ? <Empty>No reviews yet.</Empty> : reviews.map((b) => (
-          <Card key={b.id} title={b.title} action={<Stars value={b.review.rating} size={14} />}>
+          <Card key={b.id} title={b.title} action={<RatingBadge value={b.review.rating} />}>
             <p className="text-sm">{b.review.text || <span className="text-muted">Rated, no written review.</span>}</p>
             <button className="text-xs text-muted hover:text-accent mt-2" onClick={() => openBook(b.id)}>{b.author} · open book</button>
           </Card>

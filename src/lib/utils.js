@@ -8,7 +8,7 @@ export const todayStr = (d = new Date()) => {
 export const STATUSES = [
   { id: 'wishlist', label: 'Wishlist' },
   { id: 'bought', label: 'Bought' },
-  { id: 'reading', label: 'Reading' },
+  { id: 'reading', label: 'Currently Reading' },
   { id: 'finished', label: 'Finished' },
 ]
 export const statusLabel = (id) => (STATUSES.find((s) => s.id === id) || {}).label || id
@@ -17,6 +17,9 @@ export const SOURCES = ['Owned', 'Online', 'Borrowed / Library', 'Subscription',
 export const FORMATS = ['Paper', 'eBook', 'Audio']
 export const UNITS = ['Pages', 'Percent', 'Minutes']
 export const MOODS = ['Cozy', 'Dark', 'Funny', 'Heartbreaking', 'Hopeful', 'Tense', 'Whimsical', 'Reflective', 'Adventurous', 'Romantic']
+export const QUICK_GENRES = ['Fantasy', 'Sci-Fi', 'Mystery', 'Romance', 'Action', 'Slice of Life', 'Drama', 'Horror', 'Poetry', 'Non-Fiction']
+export const LANGUAGES = ['English', 'Japanese', 'Malay', 'Chinese', 'Korean', 'French']
+export const EDITIONS = ['Manga', 'Light Novel', 'Databook', 'Novel', 'Hardcover', 'Paperback', 'Artbook', 'Omnibus', 'eBook', 'Audiobook']
 export const GENRES = ['Fantasy', 'Sci-Fi', 'Romance', 'Mystery', 'Thriller', 'Literary', 'Historical', 'Non-fiction', 'Poetry', 'Horror', 'Classic', 'Memoir']
 export const PRIORITIES = ['Must Read', 'Want to Read', 'Someday']
 
@@ -48,10 +51,13 @@ export const blankBook = () => ({
   title: '', author: '', summary: '', genres: [], pages: 0, format: 'Paper', audioMinutes: 0, narrator: '',
   unit: 'Pages', currentPage: 0,
   cover: { color: COVER_COLORS[0], style: 'solid', url: '' },
+  language: 'English', edition: 'Paperback', notesText: '',
+  yearReleased: '', yearBought: '', yearStarted: '', yearFinished: '',
+  hidden: false, volume: null, volumeLabel: '', isSeriesCover: false,
   status: 'wishlist', priority: 'Want to Read', startDate: '', finishDate: '',
   readWhere: 'Owned', sourceNote: '', returnDate: '',
   series: '', seriesNumber: 0, seriesTotal: 0,
-  review: { rating: 0, text: '', scores: { plot: 0, characters: 0, writing: 0, pacing: 0, world: 0 } },
+  review: { rating: 0 /* 0-100 */, text: '', scores: { plot: 0, characters: 0, writing: 0, pacing: 0, world: 0 } },
   moods: [], tropes: [], spice: 0, tears: 0,
   currency: 'USD', price: 0, favorite: false,
   quotes: [], notes: [], readingLog: [], characters: [], relations: [], vocab: [],
@@ -88,3 +94,39 @@ export const downloadJSON = (obj, name) => {
 }
 
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+// ---------- v2 additions ----------
+export const SCHEMA_VERSION = 2
+
+// Rating is stored 0-100. Star displays use ratingStars().
+export const ratingOf = (b) => Number((b.review || {}).rating) || 0
+export const ratingStars = (b) => ratingOf(b) / 20
+
+// "Naruto · Vol. 3 — Subtitle" for volume entries, plain title otherwise
+export const volumeText = (b) => (b.volume == null || b.volume === '' ? '' : `Vol. ${b.volume}${b.volumeLabel ? ` — ${b.volumeLabel}` : ''}`)
+export const displayTitle = (b) => (volumeText(b) ? `${b.title} · ${volumeText(b)}` : b.title)
+
+const editionFromFormat = (f) => (f === 'eBook' ? 'eBook' : f === 'Audio' ? 'Audiobook' : 'Paperback')
+export const formatFromEdition = (e) => (e === 'eBook' ? 'eBook' : e === 'Audiobook' ? 'Audio' : 'Paper')
+
+// Keep the year fields and the exact dates consistent (dates drive the charts; years are what you type)
+export const syncYears = (b) => {
+  const out = { ...b }
+  const y = (d) => (d ? Number(d.slice(0, 4)) : '')
+  if (out.startDate && !out.yearStarted) out.yearStarted = y(out.startDate)
+  if (out.finishDate && !out.yearFinished) out.yearFinished = y(out.finishDate)
+  if (out.yearStarted && (!out.startDate || y(out.startDate) !== Number(out.yearStarted))) out.startDate = `${out.yearStarted}-07-01`
+  if (out.yearFinished && (!out.finishDate || y(out.finishDate) !== Number(out.yearFinished))) out.finishDate = `${out.yearFinished}-07-01`
+  if (!out.yearFinished && !out.finishDate) out.finishDate = ''
+  return out
+}
+
+// Bring older saved data up to the current shape (rating 0-5 -> 0-100, edition, ...)
+export const migrateBook = (b, fromVersion) => {
+  const base = blankBook()
+  const m = { ...base, ...b, cover: { ...base.cover, ...(b.cover || {}) }, review: { ...base.review, ...(b.review || {}), scores: { ...base.review.scores, ...((b.review || {}).scores || {}) } } }
+  m.id = b.id || base.id
+  if (!b.edition) m.edition = editionFromFormat(b.format)
+  if ((fromVersion || 1) < 2 && m.review.rating && m.review.rating <= 5) m.review.rating = Math.round(m.review.rating * 20)
+  return m
+}

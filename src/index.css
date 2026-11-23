@@ -141,3 +141,13 @@ body {
 main [class*='grid'] > * { min-width: 0; }
 main .panel { min-width: 0; max-width: 100%; }
 main .panel .flex > div:not([class*='shrink']) { min-width: 0; }
+
+/* Volume tiles (series card), colored by status */
+@layer components {
+  .vtile { @apply relative min-w-[2.25rem] h-9 px-1.5 border text-xs font-mono flex items-center justify-center transition hover:-translate-y-0.5 cursor-pointer; border-radius: var(--radius); }
+  .vtile-wishlist { @apply border-dashed border-muted/60 text-muted bg-transparent; }
+  .vtile-bought { @apply border-accent2 text-accent2 bg-accent2/10; }
+  .vtile-reading { @apply border-accent text-accent bg-accent/25 font-bold; }
+  .vtile-finished { @apply border-accent bg-accent text-white; }
+  [data-mode='dark'] .vtile-finished { color: #0b0d0f; }
+}

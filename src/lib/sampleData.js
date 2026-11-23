@@ -85,6 +85,25 @@ export const sampleBooks = () => [
     id: 'b12', title: 'Braiding Sweetgrass', author: 'Robin Wall Kimmerer', genres: ['Non-fiction'], pages: 391, status: 'wishlist', priority: 'Someday',
     cover: { color: '#2F5D50', style: 'stripes' }, currency: 'USD', price: 17,
   }),
+  // Demo of same-title grouping: one title, two editions (Manga is the main edition: more volumes)
+  ...[[0, 'Prologue', 'finished'], [0.5, 'Special Prologue', 'finished'], [1, '', 'finished'], [2, '', 'finished'], [3, '', 'finished'], [4, '', 'reading'], [5, '', 'bought'], [6, '', 'wishlist']].map(([n, label, status], i) =>
+    mk({
+      id: `sb-m-${n}`, title: 'Skyward Blades', author: 'Aiko Mori', genres: ['Fantasy', 'Action'], language: 'English', edition: 'Manga', format: 'Paper',
+      pages: 192, status, volume: n, volumeLabel: label, isSeriesCover: n === 1, yearReleased: 2018, currency: 'MYR', price: status === 'wishlist' ? 0 : 29.9,
+      currentPage: status === 'finished' ? 192 : status === 'reading' ? 64 : 0,
+      startDate: status === 'finished' || status === 'reading' ? d(2, 1 + i) : '', finishDate: status === 'finished' ? d(2, 3 + i) : '',
+      cover: { color: '#3F4B5B', style: 'diagonal' }, reads: status === 'finished' ? 1 : 0,
+      review: status === 'finished' ? { rating: n === 1 ? 4.5 : 4 } : {},
+    })
+  ),
+  ...[[1, 'finished'], [2, 'bought'], [3, 'wishlist']].map(([n, status], i) =>
+    mk({
+      id: `sb-n-${n}`, title: 'Skyward Blades', author: 'Aiko Mori', genres: ['Fantasy', 'Action'], language: 'Japanese', edition: 'Light Novel', format: 'Paper',
+      pages: 264, status, volume: n, yearReleased: 2016, currency: 'MYR', price: status === 'wishlist' ? 0 : 39.9,
+      currentPage: status === 'finished' ? 264 : 0, startDate: status === 'finished' ? d(3, 1) : '', finishDate: status === 'finished' ? d(3, 20) : '',
+      cover: { color: '#4B3F72', style: 'frame' }, reads: status === 'finished' ? 1 : 0, review: status === 'finished' ? { rating: 4 } : {},
+    })
+  ),
 ]
 
 export const sampleCollections = () => [

@@ -4,9 +4,10 @@ import { PageTitle, Cover, Card, Modal, Field, Empty } from '../components/ui.js
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
 import { uid } from '../lib/utils.js'
+import { DeleteButton } from '../components/Confirm.jsx'
 
 export const SMART_RULES = {
-  rating5: ['5-star books', (b) => (b.review?.rating || 0) === 5],
+  rating5: ['Top rated (90+ / 100)', (b) => (b.review?.rating || 0) >= 90],
   favorites: ['Favorites', (b) => b.favorite],
   borrowed: ['Borrowed / library', (b) => b.readWhere === 'Borrowed / Library'],
   unread: ['Unread owned (TBR)', (b) => b.status === 'bought'],
@@ -18,7 +19,7 @@ export const collectionBooks = (c, books) =>
   c.type === 'smart' ? books.filter((SMART_RULES[c.rule] || [, () => false])[1]) : books.filter((b) => c.bookIds.includes(b.id))
 
 export default function Collections() {
-  const { books, collections, actions } = useStore()
+  const { books, collections, actions, flash } = useStore()
   const { openBook } = useNav()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -45,7 +46,7 @@ export default function Collections() {
             <Card key={c.id} title={c.name}
               action={<div className="flex items-center gap-2"><span className="chip">{c.type === 'smart' ? `smart · ${SMART_RULES[c.rule]?.[0]}` : 'custom'}</span>
                 {c.type === 'custom' && <button className="btn btn-ghost !p-1" onClick={() => setAdding(adding === c.id ? null : c.id)}><Plus size={15} /></button>}
-                <button className="btn btn-ghost !p-1" onClick={() => confirm('Delete this collection?') && actions.setCollections((cs) => cs.filter((x) => x.id !== c.id))}><Trash2 size={15} /></button></div>}>
+                <DeleteButton className="btn btn-ghost !p-1" prompt="Delete collection?" onConfirm={() => { if (actions.setCollections((cs) => cs.filter((x) => x.id !== c.id))) flash(`Deleted collection '${c.name}'`, 'success') }} /></div>}>
               {adding === c.id && (
                 <select className="input mb-3" value="" onChange={(e) => e.target.value && addTo(c.id, e.target.value)}>
                   <option value="">Add a book…</option>

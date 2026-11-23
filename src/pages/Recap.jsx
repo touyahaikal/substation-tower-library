@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { Trophy, Download, RotateCcw } from 'lucide-react'
-import { PageTitle, Card, Cover, Stars } from '../components/ui.jsx'
+import { PageTitle, Card, Cover, RatingBadge } from '../components/ui.jsx'
 import SpendingBreakdown from '../components/SpendingBreakdown.jsx'
 import { useStore } from '../lib/store.jsx'
 import { MONTHS } from '../lib/utils.js'
@@ -75,7 +75,7 @@ function Tournament({ books }) {
           <button key={x.id} onClick={() => pick(x.id)} className="panel p-3 hover:!border-accent flex flex-col items-center gap-2">
             <Cover book={x} size="md" />
             <div className="text-sm font-semibold">{x.title}</div>
-            <Stars value={x.review?.rating || 0} size={12} />
+            <RatingBadge value={x.review?.rating || 0} />
           </button>
         ))}
       </div>
@@ -137,7 +137,7 @@ export default function Recap() {
     <>
       <PageTitle sub="Your year in review" action={<select className="input !w-auto" value={year} onChange={(e) => setYear(Number(e.target.value))}>{years.map((y) => <option key={y}>{y}</option>)}</select>}>Recap</PageTitle>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        {[['Books finished', fin.length], ['Pages read', pages.toLocaleString()], ['Average rating', avg ? avg.toFixed(1) : '–'], ['Busiest month', fin.length ? MONTHS[bestMonth] : '–']].map(([l, v]) => (
+        {[['Books finished', fin.length], ['Pages read', pages.toLocaleString()], ['Average rating', avg ? `${Math.round(avg)}/100` : '–'], ['Busiest month', fin.length ? MONTHS[bestMonth] : '–']].map(([l, v]) => (
           <div key={l} className="panel p-4"><div className="label">{l}</div><div className="h-display text-3xl font-bold">{v}</div></div>
         ))}
       </div>

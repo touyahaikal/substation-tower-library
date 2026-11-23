@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
-import { ArrowLeft, Heart, Pencil, Trash2, Plus } from 'lucide-react'
-import { Card, Cover, Stars, Tabs, ProgressBar, Field, Empty } from '../components/ui.jsx'
+import { ArrowLeft, Heart, Pencil, Plus, Eye, EyeOff, Layers } from 'lucide-react'
+import { Card, Cover, RatingInput, RatingBadge, Tabs, ProgressBar, Field, Empty } from '../components/ui.jsx'
+import { DeleteButton } from '../components/Confirm.jsx'
+import QuickPage from '../components/QuickPage.jsx'
+import { useVolumeGenerator } from '../components/SeriesCard.jsx'
+import { titleKey, byVolume } from '../lib/groups.js'
 import CharacterBoard from '../components/CharacterBoard.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { MOODS, todayStr, uid, progressOf, unitTotal, unitSuffix, statusLabel } from '../lib/utils.js'
+import { MOODS, todayStr, uid, progressOf, unitTotal, unitSuffix, statusLabel, displayTitle } from '../lib/utils.js'
 import { fmtMoney } from '../lib/currency.js'
 
 const toggle = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
@@ -24,8 +28,9 @@ function Meter({ label, value, onChange, max = 5 }) {
 }
 
 export default function BookDetail() {
-  const { books, actions } = useStore()
+  const { books, actions, flash } = useStore()
   const { bookId, go, goLibrary, setBookModal, setTimer } = useNav()
+  const [startAdd, genEl] = useVolumeGenerator()
   const [tab, setTab] = useState('review')
   const [q, setQ] = useState({ text: '', page: '' })
   const [note, setNote] = useState('')
@@ -52,37 +57,43 @@ export default function BookDetail() {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h1 className="h-display text-2xl sm:text-3xl font-bold">{b.title}</h1>
+              <h1 className="h-display text-2xl sm:text-3xl font-bold">{displayTitle(b)}</h1>
               <div className="text-muted">{b.author}{b.series ? ` · ${b.series} #${b.seriesNumber || '?'}` : ''}</div>
             </div>
             <div className="flex gap-1 shrink-0">
               <button className="btn btn-ghost !p-1.5" onClick={() => upd({ favorite: !b.favorite })} aria-label="Favorite"><Heart size={18} className={b.favorite ? 'text-accent fill-accent' : ''} /></button>
               <button className="btn btn-ghost !p-1.5" onClick={() => setBookModal({ book: b })} aria-label="Edit"><Pencil size={16} /></button>
-              <button className="btn btn-ghost !p-1.5" onClick={() => { if (confirm(`Delete “${b.title}”?`)) { actions.deleteBooks([b.id]); goLibrary('all') } }} aria-label="Delete"><Trash2 size={16} /></button>
+              <button className="btn btn-ghost !p-1.5" onClick={() => { if (actions.setHidden([b.id], !b.hidden)) flash(b.hidden ? `Unhid '${displayTitle(b)}'` : `Hid '${displayTitle(b)}'`, 'success') }} aria-label={b.hidden ? 'Unhide' : 'Hide'} title={b.hidden ? 'Unhide' : 'Hide'}>{b.hidden ? <Eye size={16} /> : <EyeOff size={16} />}</button>
+              <DeleteButton className="btn btn-ghost !p-1.5" onConfirm={() => { if (actions.deleteBooks([b.id])) { flash(`Deleted '${displayTitle(b)}'`, 'success'); goLibrary('all') } }} />
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5 my-3">
             <span className="chip !border-accent text-accent">{statusLabel(b.status)}</span>
             <span className="chip">{b.readWhere}{b.sourceNote ? ` · ${b.sourceNote}` : ''}</span>
             {b.price > 0 && b.status !== 'wishlist' && <span className="chip font-mono">{fmtMoney(b.price, b.currency)}</span>}
-            <span className="chip">{b.format}{b.pages ? ` · ${b.pages}p` : ''}</span>
+            <span className="chip">{b.edition || b.format}{b.pages ? ` · ${b.pages}p` : ''}</span>
+            {b.language && <span className="chip">{b.language}</span>}
+            {b.hidden && <span className="chip">Hidden</span>}
+            <RatingBadge value={b.review.rating} />
             {b.genres.map((g) => <span key={g} className="chip">{g}</span>)}
             {b.readWhere === 'Borrowed / Library' && b.returnDate && <span className="chip">Return by {b.returnDate}</span>}
           </div>
           {b.summary && <p className="text-sm leading-relaxed mb-3">{b.summary}</p>}
-          {b.status === 'reading' && (
+          {b.notesText && <p className="text-sm leading-relaxed mb-3 whitespace-pre-wrap border-l-2 border-line pl-3 text-muted">{b.notesText}</p>}
+          <div className="text-xs text-muted font-mono mb-3 flex flex-wrap gap-x-4 gap-y-1">
+            {[['Released', b.yearReleased], ['Bought', b.yearBought], ['Started', b.yearStarted], ['Finished', b.yearFinished]].filter(([, y]) => y).map(([l, y]) => <span key={l}>{l} {y}</span>)}
+          </div>
+          {(b.status === 'reading' || b.status === 'bought') && (
             <div className="mb-3">
-              <ProgressBar value={progressOf(b)} />
-              <div className="flex items-center gap-2 mt-2 text-sm">
-                <input className="input !w-24" type="number" value={b.currentPage || 0} onChange={(e) => actions.setCurrentPage(b.id, e.target.value)} />
-                <span className="text-muted font-mono text-xs">/ {total || '?'}{unitSuffix(b)}</span>
-              </div>
+              {b.status === 'reading' && <ProgressBar value={progressOf(b)} />}
+              <QuickPage book={b} className="mt-2" />
             </div>
           )}
           <div className="flex gap-2 flex-wrap">
             {transitions.map(([l, fn]) => <button key={l} className="btn btn-primary" onClick={fn}>{l}</button>)}
             {b.status !== 'wishlist' && b.status !== 'bought' && null}
             {b.status === 'reading' && <button className="btn" onClick={() => actions.setStatus(b.id, 'bought')}>Move to Bought</button>}
+            <button className="btn" onClick={() => startAdd(books.filter((x) => titleKey(x.title) === titleKey(b.title) && (x.edition || '') === (b.edition || '')).sort(byVolume))}><Layers size={14} /> {b.volume != null && b.volume !== '' ? 'Add more volumes' : 'Add volumes'}</button>
           </div>
           <div className="text-xs text-muted mt-3 font-mono">
             {b.startDate && `Started ${b.startDate}`}{b.finishDate && ` · Finished ${b.finishDate}`}{b.reads > 1 && ` · Read ${b.reads}×`}
@@ -96,7 +107,7 @@ export default function BookDetail() {
           {tab === 'review' && (
             <div className="grid md:grid-cols-2 gap-4">
               <Card title="Rating & review">
-                <Stars size={24} value={b.review.rating} onChange={(r) => setReview({ rating: r })} />
+                <RatingInput value={b.review.rating} onChange={(r) => setReview({ rating: r })} />
                 <textarea className="input mt-3" rows={6} placeholder="What did you think?" value={b.review.text} onChange={(e) => setReview({ text: e.target.value })} />
               </Card>
               <Card title="Story elements">
@@ -182,6 +193,7 @@ export default function BookDetail() {
           )}
         </div>
       </div>
+      {genEl}
     </>
   )
 }
