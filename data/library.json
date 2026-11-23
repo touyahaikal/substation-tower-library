@@ -2,6 +2,76 @@
   "schemaV": 2,
   "books": [
     {
+      "id": "1rrmdp62mit9",
+      "title": "The Summer Hikaru Died",
+      "author": "Mokumokuren",
+      "summary": "",
+      "genres": [
+        "Mystery",
+        "Boy's Love"
+      ],
+      "pages": 0,
+      "format": "Paper",
+      "audioMinutes": 0,
+      "narrator": "",
+      "unit": "Pages",
+      "currentPage": 0,
+      "cover": {
+        "color": "#7C6F64",
+        "style": "solid",
+        "url": ""
+      },
+      "language": "Japanese",
+      "edition": "Manga",
+      "notesText": "",
+      "yearReleased": "",
+      "yearBought": "",
+      "yearStarted": "",
+      "yearFinished": "",
+      "hidden": false,
+      "volume": 1,
+      "volumeLabel": "",
+      "isSeriesCover": false,
+      "status": "bought",
+      "priority": "Want to Read",
+      "startDate": "",
+      "finishDate": "",
+      "readWhere": "Owned",
+      "sourceNote": "Kinokuniya Malaysia",
+      "returnDate": "",
+      "series": "",
+      "seriesNumber": 0,
+      "seriesTotal": 0,
+      "review": {
+        "rating": 0,
+        "text": "",
+        "scores": {
+          "plot": 0,
+          "characters": 0,
+          "writing": 0,
+          "pacing": 0,
+          "world": 0
+        }
+      },
+      "moods": [
+        "Dark"
+      ],
+      "tropes": [],
+      "spice": 0,
+      "tears": 0,
+      "currency": "MYR",
+      "price": 0,
+      "favorite": false,
+      "quotes": [],
+      "notes": [],
+      "readingLog": [],
+      "characters": [],
+      "relations": [],
+      "vocab": [],
+      "reads": 0,
+      "addedAt": "2026-11-23T10:04:13.629Z"
+    },
+    {
       "id": "b1",
       "title": "The Midnight Library",
       "author": "Matt Haig",
