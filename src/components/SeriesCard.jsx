@@ -5,7 +5,7 @@ import { DeleteButton } from './Confirm.jsx'
 import QuickPage from './QuickPage.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { blankBook, STATUSES, statusLabel, displayTitle, syncYears } from '../lib/utils.js'
+import { blankBook, uid, STATUSES, statusLabel, displayTitle, syncYears } from '../lib/utils.js'
 import { byVolume, planVolumes, titleKey, volNum } from '../lib/groups.js'
 import { compressImage } from '../lib/image.js'
 
@@ -30,6 +30,7 @@ export function VolumeGenerator({ template, onClose }) {
     const base = blankBook()
     const list = fresh.map((p) => ({
       ...base,
+      id: uid(),
       title: template.title, author: template.author, genres: [...(template.genres || [])], language: template.language, edition: template.edition, format: template.format,
       unit: template.unit === 'Minutes' ? 'Minutes' : 'Pages', audioMinutes: 0,
       cover: { ...template.cover }, currency: template.currency, hidden: template.hidden, yearReleased: '',

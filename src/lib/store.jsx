@@ -34,6 +34,24 @@ const loadAdmin = () => {
   }
 }
 
+// Every entry needs its own id. Later duplicates get a fresh id (the first one keeps its id, so references stay valid).
+const dedupeIds = (books) => {
+  const seen = new Set()
+  let changed = false
+  const out = books.map((b) => {
+    if (b.id && !seen.has(b.id)) {
+      seen.add(b.id)
+      return b
+    }
+    changed = true
+    let id = uid()
+    while (seen.has(id)) id = uid()
+    seen.add(id)
+    return { ...b, id }
+  })
+  return { books: out, changed }
+}
+
 // What changes on a book when its status changes (dates + year fields stay in step)
 const statusPatch = (b, status, extra = {}) => {
   const p = { status, ...extra }
@@ -97,6 +115,7 @@ export function StoreProvider({ children }) {
 
   // ----- Sync: one JSON file in your repo, via the GitHub Contents API -----
   const shaRef = useRef(null)
+  const repairedRef = useRef(false)
   const savingRef = useRef(false)
   const loadingRef = useRef(false)
   const adminRef = useRef(admin)
@@ -112,7 +131,9 @@ export function StoreProvider({ children }) {
     // theme + mode are per-visit display choices: keep what is on screen
     const { theme, mode } = dataRef.current.settings
     const ver = remote.schemaV || 1
-    setData({ ...base, ...remote, schemaV: SCHEMA_VERSION, books: (remote.books || []).map((b) => migrateBook(b, ver)), settings: { ...base.settings, ...(remote.settings || {}), theme, mode, rates: { ...DEFAULT_RATES, ...((remote.settings || {}).rates || {}) } } })
+    const fixed = dedupeIds((remote.books || []).map((b) => migrateBook(b, ver)))
+    if (fixed.changed) repairedRef.current = true // repaired duplicate ids: save the corrected file back to GitHub
+    setData({ ...base, ...remote, schemaV: SCHEMA_VERSION, books: fixed.books, settings: { ...base.settings, ...(remote.settings || {}), theme, mode, rates: { ...DEFAULT_RATES, ...((remote.settings || {}).rates || {}) } } })
   }
 
   // Commit the current data (PUT with the latest sha). Edits made while a save is running are picked up by the same loop.
@@ -149,6 +170,18 @@ export function StoreProvider({ children }) {
     }
   }, [])
 
+  // After loading from GitHub: nothing is pending, unless the loaded data had to be repaired (then save the fix soon)
+  const settleAfterLoad = () => {
+    const repaired = repairedRef.current
+    repairedRef.current = false
+    dirtyRef.current = repaired
+    if (repaired) {
+      clearTimeout(timer.current)
+      timer.current = setTimeout(() => save(false), 2500)
+    }
+    return repaired
+  }
+
   // Replace what's on screen with the file currently on GitHub
   const reload = useCallback(async (silent) => {
     const a = adminRef.current
@@ -162,8 +195,7 @@ export function StoreProvider({ children }) {
         shaRef.current = r.sha
         applyRemote(r.data)
       } else shaRef.current = null // file doesn't exist yet: the first save creates it
-      dirtyRef.current = false
-      setSyncState('synced')
+      setSyncState(settleAfterLoad() ? 'dirty' : 'synced')
       setSyncError('')
       if (silent !== true) flash('Reloaded from GitHub')
     } catch (e) {
@@ -192,8 +224,7 @@ export function StoreProvider({ children }) {
     } catch {}
     setAdmin(a)
     setReadOnly(false)
-    dirtyRef.current = false
-    setSyncState('synced')
+    setSyncState(settleAfterLoad() ? 'dirty' : 'synced')
     setSyncError('')
     return { ...user, note }
   }
@@ -317,8 +348,8 @@ export function StoreProvider({ children }) {
       return { ...d, books, readDays: d.readDays.includes(date) ? d.readDays : [...d.readDays, date] }
     }
     return {
-      addBook: (book) => mutate((d) => ({ ...d, books: [syncYears({ ...blankBook(), ...book }), ...d.books] })),
-      addBooks: (list) => mutate((d) => ({ ...d, books: [...list.map((b) => syncYears({ ...blankBook(), ...b })), ...d.books] })),
+      addBook: (book) => mutate((d) => ({ ...d, books: dedupeIds([syncYears({ ...blankBook(), ...book }), ...d.books]).books })),
+      addBooks: (list) => mutate((d) => ({ ...d, books: dedupeIds([...list.map((b) => syncYears({ ...blankBook(), ...b })), ...d.books]).books })),
       updateBook: patchBook,
       deleteBooks: (ids) => mutate((d) => ({ ...d, books: d.books.filter((b) => !ids.includes(b.id)) })),
       setHidden: (ids, hidden) => mutate((d) => ({ ...d, books: d.books.map((b) => (ids.includes(b.id) ? { ...b, hidden } : b)) })),
