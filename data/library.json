@@ -17,7 +17,7 @@
         "style": "solid",
         "url": ""
       },
-      "status": "wishlist",
+      "status": "bought",
       "priority": "Want to Read",
       "startDate": "",
       "finishDate": "",
@@ -26,7 +26,7 @@
       "returnDate": "",
       "series": "",
       "seriesNumber": 0,
-      "seriesTotal": 0,
+      "seriesTotal": 10,
       "review": {
         "rating": 0,
         "text": "",
@@ -38,12 +38,14 @@
           "world": 0
         }
       },
-      "moods": [],
+      "moods": [
+        "Dark"
+      ],
       "tropes": [],
       "spice": 0,
       "tears": 0,
       "currency": "MYR",
-      "price": 0,
+      "price": 33.45,
       "favorite": false,
       "quotes": [],
       "notes": [],
