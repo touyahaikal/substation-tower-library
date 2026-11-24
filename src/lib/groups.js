@@ -27,11 +27,23 @@ export function buildEditions(entries) {
     entries: [...list].sort(byVolume),
     finished: list.filter((b) => b.status === 'finished').length,
     pages: totalPages(list),
-    pagesRead: list.reduce((s, b) => s + (b.status === 'finished' ? Number(b.pages) || 0 : b.status === 'reading' ? Number(b.currentPage) || 0 : 0), 0),
+    pagesRead: list.reduce((s, b) => s + (b.status === 'finished' ? Number(b.pages) || 0 : (b.status === 'reading' || b.status === 'paused') ? Number(b.currentPage) || 0 : 0), 0),
   }))
   // main edition = most entries, ties broken by total pages
   eds.sort((a, b) => b.entries.length - a.entries.length || b.pages - a.pages || a.edition.localeCompare(b.edition))
   return eds
+}
+
+// One status for a whole title: all finished -> finished; any reading -> reading; any paused -> paused;
+// some finished (rest unread) -> reading (in progress); any bought -> bought; else wishlist
+export function groupStatus(entries) {
+  const has = (st) => entries.some((b) => b.status === st)
+  if (entries.length && entries.every((b) => b.status === 'finished')) return 'finished'
+  if (has('reading')) return 'reading'
+  if (has('paused')) return 'paused'
+  if (has('finished')) return 'reading'
+  if (has('bought')) return 'bought'
+  return 'wishlist'
 }
 
 export function buildGroups(books) {
@@ -54,6 +66,8 @@ export function buildGroups(books) {
       title: main.entries[0].title,
       author: (main.entries.find((b) => b.author) || main.entries[0]).author,
       finished,
+      status: groupStatus(entries),
+      favorite: entries.some((b) => b.favorite),
       pages: totalPages(entries),
       pagesRead: editions.reduce((s, e) => s + e.pagesRead, 0),
       progress: entries.reduce((s, b) => s + progressOf(b), 0) / entries.length,

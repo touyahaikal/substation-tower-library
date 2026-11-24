@@ -148,6 +148,8 @@ main .panel .flex > div:not([class*='shrink']) { min-width: 0; }
   .vtile-wishlist { @apply border-dashed border-muted/60 text-muted bg-transparent; }
   .vtile-bought { @apply border-accent2 text-accent2 bg-accent2/10; }
   .vtile-reading { @apply border-accent text-accent bg-accent/25 font-bold; }
+  .vtile-paused { border-color: rgb(217 154 15); color: rgb(180 120 5); background: rgb(217 154 15 / .22); font-weight: 700; }
+  [data-mode='dark'] .vtile-paused { color: rgb(245 190 70); }
   .vtile-finished { @apply border-accent bg-accent text-white; }
   [data-mode='dark'] .vtile-finished { color: #0b0d0f; }
 }

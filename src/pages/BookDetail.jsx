@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
-import { ArrowLeft, Heart, Pencil, Plus, Eye, EyeOff, Layers } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronDown, Heart, Pencil, Plus, Eye, EyeOff, Layers, Star, Timer } from 'lucide-react'
 import { Card, Cover, RatingInput, RatingBadge, Tabs, ProgressBar, Field, Empty } from '../components/ui.jsx'
 import { DeleteButton } from '../components/Confirm.jsx'
 import QuickPage from '../components/QuickPage.jsx'
 import { useVolumeGenerator } from '../components/SeriesCard.jsx'
 import { titleKey, byVolume } from '../lib/groups.js'
 import CharacterBoard from '../components/CharacterBoard.jsx'
+import { StatusActions, CornerBadge } from '../components/StatusUI.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { MOODS, todayStr, uid, progressOf, unitTotal, unitSuffix, statusLabel, displayTitle } from '../lib/utils.js'
+import { STATUSES, statusLabel, statusColor, tagList, todayStr, uid, progressOf, unitTotal, displayTitle } from '../lib/utils.js'
 import { fmtMoney } from '../lib/currency.js'
 
 const toggle = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
@@ -28,8 +29,9 @@ function Meter({ label, value, onChange, max = 5 }) {
 }
 
 export default function BookDetail() {
-  const { books, actions, flash } = useStore()
-  const { bookId, go, goLibrary, setBookModal, setTimer } = useNav()
+  const { books, actions, flash, settings } = useStore()
+  const { bookId, openBook, openTitle, goLibrary, setBookModal, setTimer } = useNav()
+  const [about, setAbout] = useState(true)
   const [startAdd, genEl] = useVolumeGenerator()
   const [tab, setTab] = useState('review')
   const [q, setQ] = useState({ text: '', page: '' })
@@ -40,65 +42,113 @@ export default function BookDetail() {
 
   const upd = (patch) => actions.updateBook(b.id, patch)
   const setReview = (patch) => upd({ review: { ...b.review, ...patch } })
-  const total = unitTotal(b)
-
-  const transitions = {
-    wishlist: [['Move to Bought', () => actions.setStatus(b.id, 'bought')]],
-    bought: [['Start reading', () => actions.setStatus(b.id, 'reading')]],
-    reading: [['Mark as finished', () => actions.setStatus(b.id, 'finished')], ['Start a timer', () => setTimer({ bookId: b.id, startedAt: Date.now() })]],
-    finished: [['Read it again', () => actions.readAgain(b.id)]],
-  }[b.status]
+  const tk = titleKey(b.title)
+  const siblings = books.filter((x) => titleKey(x.title) === tk)
+  const sameEd = siblings.filter((x) => (x.edition || '') === (b.edition || '')).sort(byVolume)
+  const at = sameEd.findIndex((x) => x.id === b.id)
+  const prev = at > 0 ? sameEd[at - 1] : null
+  const next = at >= 0 && at < sameEd.length - 1 ? sameEd[at + 1] : null
+  const inSeries = siblings.length > 1 || (b.volume != null && b.volume !== '')
+  const vol = b.volume != null && b.volume !== '' ? `Vol. ${b.volume}` : ''
+  const crumb = [vol || b.edition || 'Book', vol && b.edition ? `· ${b.edition}` : ''].join(' ').trim()
+  const days = b.startDate && b.finishDate ? Math.max(1, Math.round((new Date(b.finishDate) - new Date(b.startDate)) / 86400000) + 1) : null
+  const meta = [
+    ['Pages', b.pages ? b.pages.toLocaleString() : '—'],
+    ['Started', b.startDate || b.yearStarted || '—'],
+    ['Finished', b.finishDate || b.yearFinished || '—'],
+    ['Days to read', days ? `${days}` : '—'],
+    ['Publisher', b.publisher || '—'],
+    ['Published', b.yearReleased || '—'],
+    ['List price', b.price > 0 ? fmtMoney(b.price, b.currency) : '—'],
+    ['Added', b.addedAt ? b.addedAt.slice(0, 10) : '—'],
+  ]
+  const color = statusColor(b.status)
+  const moods = tagList(settings, books, 'moods')
+  const tropeList = tagList(settings, books, 'tropes')
+  const warnList = tagList(settings, books, 'warnings')
 
   return (
     <>
-      <button className="btn btn-ghost mb-3" onClick={() => goLibrary('all')}><ArrowLeft size={14} /> Library</button>
-      <div className="panel p-4 flex gap-5 flex-wrap sm:flex-nowrap">
-        <Cover book={b} size="xl" />
+      <nav className="flex items-center gap-1.5 text-sm text-muted mb-3 flex-wrap" aria-label="Breadcrumb">
+        <button className="btn btn-ghost !py-1" onClick={() => goLibrary('all')}>Library</button>
+        <span>›</span>
+        {inSeries ? <button className="btn btn-ghost !py-1 font-semibold" onClick={() => openTitle(tk)} data-crumb="title">{b.title}</button> : <span className="text-ink font-semibold">{b.title}</span>}
+        {inSeries && <><span>›</span><span className="text-ink" data-crumb="volume">{crumb}</span></>}
+        <div className="ml-auto flex gap-1.5">
+          <button className="btn !py-1 text-xs" disabled={!prev} onClick={() => prev && openBook(prev.id)}><ChevronLeft size={13} /> Prev Vol</button>
+          <button className="btn !py-1 text-xs" disabled={!next} onClick={() => next && openBook(next.id)}>Next Vol <ChevronRight size={13} /></button>
+        </div>
+      </nav>
+
+      <div className="panel overflow-hidden" style={{ borderTop: `3px solid ${color}` }} data-page="book">
+       <div className="p-4 flex gap-5 flex-wrap sm:flex-nowrap">
+        <div className="relative shrink-0 h-fit">
+          <Cover book={b} size="xl" />
+          <CornerBadge status={b.status} progress={progressOf(b)} size={34} />
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
               <h1 className="h-display text-2xl sm:text-3xl font-bold">{displayTitle(b)}</h1>
               <div className="text-muted">{b.author}{b.series ? ` · ${b.series} #${b.seriesNumber || '?'}` : ''}</div>
+              <div className="mt-1 flex items-center gap-3 flex-wrap"><RatingBadge value={b.review.rating} /></div>
             </div>
             <div className="flex gap-1 shrink-0">
               <button className="btn btn-ghost !p-1.5" onClick={() => upd({ favorite: !b.favorite })} aria-label="Favorite"><Heart size={18} className={b.favorite ? 'text-accent fill-accent' : ''} /></button>
               <button className="btn btn-ghost !p-1.5" onClick={() => setBookModal({ book: b })} aria-label="Edit"><Pencil size={16} /></button>
               <button className="btn btn-ghost !p-1.5" onClick={() => { if (actions.setHidden([b.id], !b.hidden)) flash(b.hidden ? `Unhid '${displayTitle(b)}'` : `Hid '${displayTitle(b)}'`, 'success') }} aria-label={b.hidden ? 'Unhide' : 'Hide'} title={b.hidden ? 'Unhide' : 'Hide'}>{b.hidden ? <Eye size={16} /> : <EyeOff size={16} />}</button>
-              <DeleteButton className="btn btn-ghost !p-1.5" onConfirm={() => { if (actions.deleteBooks([b.id])) { flash(`Deleted '${displayTitle(b)}'`, 'success'); goLibrary('all') } }} />
+              <DeleteButton className="btn btn-ghost !p-1.5" onConfirm={() => { if (actions.deleteBooks([b.id])) { flash(`Deleted '${displayTitle(b)}'`, 'success'); inSeries && siblings.length > 1 ? openTitle(tk) : goLibrary('all') } }} />
             </div>
           </div>
-          <div className="flex flex-wrap gap-1.5 my-3">
-            <span className="chip !border-accent text-accent">{statusLabel(b.status)}</span>
-            <span className="chip">{b.readWhere}{b.sourceNote ? ` · ${b.sourceNote}` : ''}</span>
-            {b.price > 0 && b.status !== 'wishlist' && <span className="chip font-mono">{fmtMoney(b.price, b.currency)}</span>}
-            <span className="chip">{b.edition || b.format}{b.pages ? ` · ${b.pages}p` : ''}</span>
+
+          <div className="flex flex-wrap gap-1.5 my-3" aria-label="Status">
+            {STATUSES.map((s) => (
+              <button key={s.id} className="chip transition" data-pill={s.id} aria-pressed={b.status === s.id}
+                style={b.status === s.id ? { color: '#fff', background: statusColor(s.id), borderColor: statusColor(s.id), fontWeight: 600 } : {}}
+                onClick={() => b.status !== s.id && actions.setStatus(b.id, s.id)}>{s.label}</button>
+            ))}
+            {b.edition && <span className="chip">{b.edition}</span>}
             {b.language && <span className="chip">{b.language}</span>}
             {b.hidden && <span className="chip">Hidden</span>}
-            <RatingBadge value={b.review.rating} />
             {b.genres.map((g) => <span key={g} className="chip">{g}</span>)}
             {b.readWhere === 'Borrowed / Library' && b.returnDate && <span className="chip">Return by {b.returnDate}</span>}
           </div>
-          {b.summary && <p className="text-sm leading-relaxed mb-3">{b.summary}</p>}
-          {b.notesText && <p className="text-sm leading-relaxed mb-3 whitespace-pre-wrap border-l-2 border-line pl-3 text-muted">{b.notesText}</p>}
-          <div className="text-xs text-muted font-mono mb-3 flex flex-wrap gap-x-4 gap-y-1">
-            {[['Released', b.yearReleased], ['Bought', b.yearBought], ['Started', b.yearStarted], ['Finished', b.yearFinished]].filter(([, y]) => y).map(([l, y]) => <span key={l}>{l} {y}</span>)}
-          </div>
-          {(b.status === 'reading' || b.status === 'bought') && (
+
+          {(b.status === 'reading' || b.status === 'paused' || b.status === 'bought') && (
             <div className="mb-3">
-              {b.status === 'reading' && <ProgressBar value={progressOf(b)} />}
+              {b.status !== 'bought' && <ProgressBar value={progressOf(b)} />}
               <QuickPage book={b} className="mt-2" />
             </div>
           )}
           <div className="flex gap-2 flex-wrap">
-            {transitions.map(([l, fn]) => <button key={l} className="btn btn-primary" onClick={fn}>{l}</button>)}
-            {b.status !== 'wishlist' && b.status !== 'bought' && null}
-            {b.status === 'reading' && <button className="btn" onClick={() => actions.setStatus(b.id, 'bought')}>Move to Bought</button>}
-            <button className="btn" onClick={() => startAdd(books.filter((x) => titleKey(x.title) === titleKey(b.title) && (x.edition || '') === (b.edition || '')).sort(byVolume))}><Layers size={14} /> {b.volume != null && b.volume !== '' ? 'Add more volumes' : 'Add volumes'}</button>
+            <StatusActions book={b} />
+            {b.status === 'reading' && <button className="btn" onClick={() => setTimer({ bookId: b.id, startedAt: Date.now() })}><Timer size={14} /> Start a timer</button>}
+            <button className={`btn ${b.isSeriesCover ? 'btn-primary' : ''}`} onClick={() => { if (actions.setSeriesCover(b.id)) flash(`Using ${displayTitle(b)}’s cover for the whole series`, 'success') }}><Star size={14} /> {b.isSeriesCover ? 'Series cover ✓' : 'Set as Series Cover'}</button>
+            <button className="btn" onClick={() => startAdd(sameEd)}><Layers size={14} /> {b.volume != null && b.volume !== '' ? 'Add more volumes' : 'Add volumes'}</button>
           </div>
-          <div className="text-xs text-muted mt-3 font-mono">
-            {b.startDate && `Started ${b.startDate}`}{b.finishDate && ` · Finished ${b.finishDate}`}{b.reads > 1 && ` · Read ${b.reads}×`}
-          </div>
+          {b.reads > 1 && <div className="text-xs text-muted mt-3 font-mono">Read {b.reads}×</div>}
         </div>
+       </div>
+
+       <div className="px-4 pb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2" data-meta>
+          {meta.map(([l, v]) => (
+            <div key={l} className="rounded-full border border-line px-4 py-1.5 text-center min-w-0">
+              <div className="text-[10px] font-mono tracking-wider uppercase text-muted">{l}</div>
+              <div className="text-sm font-semibold truncate">{v}</div>
+            </div>
+          ))}
+        </div>
+        <button className="mt-4 flex items-center gap-1.5 text-xs font-mono font-bold tracking-wider uppercase text-muted hover:text-ink" onClick={() => setAbout(!about)} aria-expanded={about}>
+          <ChevronDown size={14} className={`transition ${about ? '' : '-rotate-90'}`} /> About the book
+        </button>
+        {about && (
+          <div className="mt-2 text-sm leading-relaxed space-y-2" data-about>
+            {b.summary ? <p>{b.summary}</p> : <p className="text-muted">No description yet. Use Edit to add one.</p>}
+            {b.notesText && <p className="whitespace-pre-wrap border-l-2 border-line pl-3 text-muted">{b.notesText}</p>}
+          </div>
+        )}
+       </div>
       </div>
 
       <div className="mt-6">
@@ -183,10 +233,13 @@ export default function BookDetail() {
           {tab === 'mood' && (
             <div className="grid md:grid-cols-2 gap-4">
               <Card title="Mood tags">
-                <div className="flex flex-wrap gap-1.5">{MOODS.map((m) => <button key={m} className={`chip ${b.moods.includes(m) ? '!border-accent text-accent' : ''}`} onClick={() => upd({ moods: toggle(b.moods, m) })}>{m}</button>)}</div>
+                <div className="flex flex-wrap gap-1.5">{moods.map((m) => <button key={m} className={`chip ${b.moods.includes(m) ? '!border-accent text-accent' : ''}`} onClick={() => upd({ moods: toggle(b.moods, m) })}>{m}</button>)}</div>
               </Card>
               <Card title="Tropes & meters">
+                <div className="flex flex-wrap gap-1.5 mb-2">{tropeList.map((m) => <button key={m} className={`chip ${(b.tropes || []).includes(m) ? '!border-accent text-accent' : ''}`} onClick={() => upd({ tropes: toggle(b.tropes || [], m) })}>{m}</button>)}</div>
                 <input className="input mb-3" placeholder="Add tropes, comma separated" value={(b.tropes || []).join(', ')} onChange={(e) => upd({ tropes: e.target.value.split(',').map((s) => s.trimStart()) })} onBlur={(e) => upd({ tropes: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
+ <div className="label">Content warnings</div>
+                <div className="flex flex-wrap gap-1.5 mb-3">{warnList.map((m) => <button key={m} className={`chip ${(b.contentWarnings || []).includes(m) ? '!border-red-500 text-red-500' : ''}`} onClick={() => upd({ contentWarnings: toggle(b.contentWarnings || [], m) })}>{m}</button>)}</div>
                 <div className="space-y-2"><Meter label="Spice" value={b.spice || 0} onChange={(v) => upd({ spice: v })} /><Meter label="Tears" value={b.tears || 0} onChange={(v) => upd({ tears: v })} /></div>
               </Card>
             </div>

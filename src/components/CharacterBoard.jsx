@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react'
 import { Plus, ZoomIn, ZoomOut, Link2, Trash2 } from 'lucide-react'
+import { Modal } from './ui.jsx'
+import CharacterModal from './CharacterModal.jsx'
 import { useStore } from '../lib/store.jsx'
-import { uid } from '../lib/utils.js'
+import { uid, avatarOf, displayTitle } from '../lib/utils.js'
 
 const W = 130, H = 56
 
@@ -11,24 +13,20 @@ export default function CharacterBoard({ book }) {
   const [zoom, setZoom] = useState(1)
   const [linking, setLinking] = useState(null)
   const [selected, setSelected] = useState(null)
+  const [form, setForm] = useState(null) // null | {character?}
+  const [rel, setRel] = useState(null) // {from,to,label}
   const drag = useRef(null)
   const chars = book.characters || []
   const rels = book.relations || []
 
   const save = (patch) => actions.updateBook(book.id, patch)
-  const add = () => {
-    const name = prompt('Character name?')
-    if (!name) return
-    const i = chars.length
-    save({ characters: [...chars, { id: uid(), name, note: '', x: 30 + (i % 4) * 160, y: 30 + Math.floor(i / 4) * 100 }] })
-  }
+  const add = () => setForm({})
   const move = (id, x, y) => save({ characters: chars.map((c) => (c.id === id ? { ...c, x, y } : c)) })
   const onDown = (e, c) => {
     if (readOnly) return
     if (linking) {
       if (linking !== c.id) {
-        const label = prompt('Relationship (e.g. sister of, rival of)?') || ''
-        save({ relations: [...rels, { id: uid(), from: linking, to: c.id, label }] })
+        setRel({ from: linking, to: c.id, label: '' })
       }
       setLinking(null)
       return
@@ -44,16 +42,19 @@ export default function CharacterBoard({ book }) {
   }
   const onUp = () => (drag.current = null)
   const del = (id) => save({ characters: chars.filter((c) => c.id !== id), relations: rels.filter((r) => r.from !== id && r.to !== id) })
-  const edit = (c) => {
-    const note = prompt('Note about this character', c.note || '')
-    if (note !== null) save({ characters: chars.map((x) => (x.id === c.id ? { ...x, note } : x)) })
-  }
+  const edit = (c) => setForm({ character: c })
   const byId = Object.fromEntries(chars.map((c) => [c.id, c]))
   const maxX = Math.max(600, ...chars.map((c) => c.x + W + 40))
   const maxY = Math.max(320, ...chars.map((c) => c.y + H + 40))
 
   return (
     <div>
+      {form && <CharacterModal choices={[{ id: book.id, label: displayTitle(book) }]} bookId={book.id} character={form.character} onClose={() => setForm(null)} />}
+      {rel && (
+        <Modal title="How are they related?" onClose={() => setRel(null)} footer={<><button className="btn" onClick={() => setRel(null)}>Cancel</button><button className="btn btn-primary" onClick={() => { save({ relations: [...rels, { id: uid(), from: rel.from, to: rel.to, label: rel.label.trim() }] }); setRel(null) }}>Connect</button></>}>
+          <input className="input" autoFocus placeholder="e.g. sister of, rival of" value={rel.label} onChange={(e) => setRel({ ...rel, label: e.target.value })} onKeyDown={(e) => { if (e.key === 'Enter') { save({ relations: [...rels, { id: uid(), from: rel.from, to: rel.to, label: rel.label.trim() }] }); setRel(null) } }} />
+        </Modal>
+      )}
       <div className="flex gap-2 mb-2 flex-wrap items-center">
         <button className="btn" onClick={add}><Plus size={14} /> Add character</button>
         <button className="btn" disabled={!selected} onClick={() => setLinking(selected)}><Link2 size={14} /> {linking ? 'Click a second character…' : 'Connect selected'}</button>
@@ -85,8 +86,8 @@ export default function CharacterBoard({ book }) {
               <div key={c.id} onPointerDown={(e) => onDown(e, c)} onDoubleClick={() => edit(c)}
                 className={`absolute panel px-2 py-1.5 cursor-grab select-none touch-none ${selected === c.id ? '!border-accent ring-1 ring-accent' : ''} ${linking && linking !== c.id ? 'hover:!border-accent' : ''}`}
                 style={{ left: c.x, top: c.y, width: W, minHeight: H }}>
-                <div className="text-sm font-semibold truncate">{c.name}</div>
-                <div className="text-[10px] text-muted truncate">{c.note || 'double-click to add a note'}</div>
+                <div className="text-sm font-semibold truncate">{avatarOf(c.avatar)} {c.name}</div>
+                <div className="text-[10px] text-muted truncate">{c.role || c.desc || c.note || 'double-click to edit'}</div>
               </div>
             ))}
           </div>

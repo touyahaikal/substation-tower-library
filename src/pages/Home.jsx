@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Minus, Plus, Flame, Pause, Timer, Quote, Sparkles, BookOpen, Target } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Minus, Plus, Flame, Pause, Play, Timer, Quote, Sparkles, BookOpen, Target } from 'lucide-react'
 import { Card, Cover, ProgressBar, PageTitle, Empty } from '../components/ui.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
@@ -36,16 +36,30 @@ function Streak() {
 }
 
 function CurrentlyReading() {
-  const { books, actions } = useStore()
+  const { books, actions, flash } = useStore()
   const { openBook, setTimer, goLibrary } = useNav()
   const reading = books.filter((b) => b.status === 'reading')
+  const paused = books.filter((b) => b.status === 'paused')
   const [i, setI] = useState(0)
+  // "Paused / On Hold" pill: one click puts a paused book back to Currently Reading
+  const pausedPill = paused.length > 0 && (
+    <div className="mt-4 pt-3 border-t border-dashed border-line flex items-center gap-2 flex-wrap" data-paused-pill>
+      <span className="chip font-mono font-bold !border-[rgb(217_154_15)]" style={{ color: 'rgb(217 154 15)' }}><Pause size={11} className="mr-1" fill="currentColor" />Paused / On Hold · {paused.length}</span>
+      {paused.map((p) => (
+        <span key={p.id} className="inline-flex items-center gap-1 panel !py-0.5 pl-2 pr-1 text-xs">
+          <button className="hover:text-accent max-w-[10rem] truncate" onClick={() => openBook(p.id)}>{p.title}{p.volume != null && p.volume !== '' ? ` · Vol. ${p.volume}` : ''}</button>
+          <button className="btn !py-0.5 !px-2 text-[11px] btn-primary" onClick={() => { if (actions.setStatus(p.id, 'reading')) flash(`Resumed '${p.title}'`, 'success') }}><Play size={10} /> Resume</button>
+        </span>
+      ))}
+    </div>
+  )
   if (!reading.length) {
     return (
       <Card title="Currently reading" className="md:col-span-2">
         <Empty icon={BookOpen}>
           Nothing in progress. <button className="text-accent underline" onClick={() => goLibrary('bought')}>Pick something from your Bought pile</button>.
         </Empty>
+        {pausedPill}
       </Card>
     )
   }
@@ -81,10 +95,12 @@ function CurrentlyReading() {
           </div>
           <div className="flex gap-2 mt-3 flex-wrap">
             <button className="btn" onClick={() => setTimer({ bookId: b.id, startedAt: Date.now() })}><Timer size={14} /> Start a timer</button>
+            <button className="btn" onClick={() => { if (actions.setStatus(b.id, 'paused')) flash(`Paused '${b.title}' (page kept)`, 'success') }}><Pause size={14} /> Pause</button>
             <button className="btn" onClick={() => actions.setStatus(b.id, 'finished')}>Mark finished</button>
           </div>
         </div>
       </div>
+      {pausedPill}
     </Card>
   )
 }

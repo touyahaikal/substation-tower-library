@@ -15,7 +15,7 @@ const SECTIONS = [
 export default function Sidebar({ collapsed, setCollapsed }) {
   const { page, go, goLibrary } = useNav()
   const Item = ([id, label, Icon]) => {
-    const active = page === id || (id === 'library' && page === 'book')
+    const active = page === id || (id === 'library' && (page === 'book' || page === 'title'))
     return (
       <button
         key={id}

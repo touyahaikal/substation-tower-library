@@ -22,16 +22,17 @@ import Tasks from './pages/Tasks.jsx'
 import Recap from './pages/Recap.jsx'
 import Preferences from './pages/Preferences.jsx'
 import BookDetail from './pages/BookDetail.jsx'
+import TitlePage from './pages/TitlePage.jsx'
 
 const PAGES = {
   home: Home, library: Library, shelves: Shelves, wishlist: WishList, series: Series, collections: Collections,
   journal: Journal, characters: Characters, calendar: Calendar, challenges: Challenges, tasks: Tasks, recap: Recap,
-  preferences: Preferences, book: BookDetail,
+  preferences: Preferences, book: BookDetail, title: TitlePage,
 }
 
 function Shell() {
   const { page, bookModal, setBookModal, syncOpen, setSyncOpen, timer, openBook } = useNav()
-  const { toast, readOnly, admin, switchToLocalCopy, confirmReq } = useStore()
+  const { toast, readOnly, admin, switchToLocalCopy, confirmReq, actions, flash } = useStore()
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 900)
   const Page = PAGES[page] || Home
 
@@ -49,6 +50,24 @@ function Shell() {
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
   }, [bookModal, syncOpen, confirmReq, setBookModal])
+
+  // "/" jumps to search; Ctrl/Cmd+Z undoes the last change (not while typing in a field, so the field's own undo still works)
+  useEffect(() => {
+    const typing = (t) => { const tag = ((t && t.tagName) || '').toLowerCase(); return tag === 'input' || tag === 'textarea' || tag === 'select' || (t && t.isContentEditable) }
+    const h = (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing(e.target)) {
+        if (bookModal || syncOpen || confirmReq) return
+        const el = document.getElementById('global-search')
+        if (el) { e.preventDefault(); el.focus(); el.select() }
+      } else if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey) && !e.shiftKey && !typing(e.target)) {
+        e.preventDefault()
+        if (actions.undo()) flash('Undone', 'success')
+        else flash('Nothing to undo', 'info')
+      }
+    }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [bookModal, syncOpen, confirmReq, actions, flash])
   return (
     <div className="h-full flex">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />

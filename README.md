@@ -92,3 +92,11 @@ public/config.json        optional visitor source
 ## Unified title cards
 
 Every entry with the same title (case-insensitive, extra spaces ignored) forms one card in **Cards**, **List** and **Covers**. The largest format (most volumes, then most pages) is the main edition with bulk range status and its tile grid; other formats sit under **Other formats**, separated by dashed lines, each with its own tiles and **+ Add volumes** when it is a single entry. Search and filters match if any volume or format matches.
+
+## Statuses, title pages, characters, tags
+
+- **5 statuses:** Wishlist, Bought, Currently Reading, Paused, Finished. One-click buttons on cards, the volume drawer and every book page: *Start Reading*, *Pause Reading* (keeps your page), *Resume Reading*, *Mark as Finished* (jumps to the last page and records the finish date), *Read it again*. Home shows a **Paused / On Hold** pill with a one-click Resume.
+- **Library cards:** coloured top border and status header (green Finished with ♥ for favourites, amber Paused, Reading with a % ring and thin bottom bar, Bought/Wishlist pills), plus a round badge on the cover corner.
+- **Two levels:** click a title card to open its **Official Title page** (series cover picker, overall progress, bulk range status, Add volumes, Hide, Delete, tabs Volumes / Databooks / Light Novels / Other Formats). Click a volume to open its **book page** with breadcrumb, Prev Vol / Next Vol, status pills, 0–100 score, metadata pills, collapsible About, and Review / Quotes / Notes / Reading Log / Characters / Mood & Tropes.
+- **Characters:** filter by Official Title and then by volume/edition; each card shows a volume badge. The Add/Edit modal has avatar tiles and all character fields, plus an "Unsaved changes" indicator.
+- **Preferences → Tags & labels:** manage Genres, Moods, Tropes and Content warnings with live usage counts, inline rename/delete and + Add. **About** lists shortcuts: `N` add a book, `/` search, `Ctrl+Z` undo (this session only), `Esc` close.

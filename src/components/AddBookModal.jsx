@@ -3,7 +3,7 @@ import { Upload, X } from 'lucide-react'
 import { Modal, Field, Cover, Tabs, RatingInput, SelectCustom } from './ui.jsx'
 import { useStore } from '../lib/store.jsx'
 import {
-  blankBook, STATUSES, SOURCES, UNITS, MOODS, QUICK_GENRES, LANGUAGES, EDITIONS, PRIORITIES, COVER_COLORS, COVER_STYLES,
+  blankBook, tagList, STATUSES, SOURCES, UNITS, MOODS, QUICK_GENRES, LANGUAGES, EDITIONS, PRIORITIES, COVER_COLORS, COVER_STYLES,
   formatFromEdition, syncYears, displayTitle,
 } from '../lib/utils.js'
 import { CURRENCIES } from '../lib/currency.js'
@@ -15,7 +15,7 @@ const parseGenres = (t) => [...new Set(t.split(',').map((x) => x.trim()).filter(
 export default function AddBookModal({ initial, defaults, onClose }) {
   const { actions, settings, books, flash } = useStore()
   const editing = !!initial
-  const [b, setB] = useState(() => ({ ...blankBook(), currency: settings.primaryCurrency, ...(initial || {}), ...(defaults || {}) }))
+  const [b, setB] = useState(() => ({ ...blankBook(), currency: settings.primaryCurrency, language: settings.defaultLanguage || 'English', ...(initial || {}), ...(defaults || {}) }))
   const [tab, setTab] = useState('details')
   const [genreText, setGenreText] = useState(() => (b.genres || []).join(', '))
   const [titleErr, setTitleErr] = useState(false)
@@ -75,7 +75,7 @@ export default function AddBookModal({ initial, defaults, onClose }) {
       const t = new Date().toISOString().slice(0, 10)
       if (clean.status === 'reading' && clean.pages > 0 && clean.unit === 'Pages' && clean.currentPage >= clean.pages) clean.status = 'finished'
       if (clean.status === 'finished' && !clean.finishDate && !clean.yearFinished) clean.finishDate = t
-      if (clean.status === 'reading' && !clean.startDate && !clean.yearStarted) clean.startDate = t
+      if ((clean.status === 'reading' || clean.status === 'paused') && !clean.startDate && !clean.yearStarted) clean.startDate = t
       clean = syncYears(clean)
       const ok = editing ? actions.updateBook(clean.id, clean) : actions.addBook(clean)
       if (!ok) return // mutate() already showed why (read-only / still loading)
@@ -135,7 +135,7 @@ export default function AddBookModal({ initial, defaults, onClose }) {
               <Field label="Genre (comma-separated)">
                 <input className="input" value={genreText} onChange={(e) => onGenreText(e.target.value)} placeholder="Fantasy, Drama" />
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
-                  {QUICK_GENRES.map((g) => {
+                  {tagList(settings, books, 'genres').map((g) => {
                     const on = genres.some((x) => x.toLowerCase() === g.toLowerCase())
                     return (
                       <button key={g} type="button" className={`chip ${on ? '!border-accent text-accent' : ''}`} aria-pressed={on}
@@ -150,6 +150,7 @@ export default function AddBookModal({ initial, defaults, onClose }) {
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="Language"><SelectCustom value={b.language} onChange={(language) => set({ language })} options={LANGUAGES} placeholder="Language" /></Field>
                 <Field label="Edition / Format"><SelectCustom value={b.edition} onChange={setEdition} options={EDITIONS} placeholder="Edition" /></Field>
+                <Field label="Publisher"><input className="input" value={b.publisher || ''} onChange={(e) => set({ publisher: e.target.value })} placeholder="e.g. Shueisha" /></Field>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -233,7 +234,17 @@ export default function AddBookModal({ initial, defaults, onClose }) {
             <Field label="Review"><textarea className="input" rows={3} value={b.review.text} onChange={(e) => setReview({ text: e.target.value })} /></Field>
             <Field label="Mood tags">
               <div className="flex flex-wrap gap-1.5">
-                {MOODS.map((m) => <button key={m} type="button" className={`chip ${b.moods.includes(m) ? '!border-accent text-accent' : ''}`} onClick={() => set({ moods: toggle(b.moods, m) })}>{m}</button>)}
+                {tagList(settings, books, 'moods').map((m) => <button key={m} type="button" className={`chip ${b.moods.includes(m) ? '!border-accent text-accent' : ''}`} onClick={() => set({ moods: toggle(b.moods, m) })}>{m}</button>)}
+              </div>
+            </Field>
+            <Field label="Tropes">
+              <div className="flex flex-wrap gap-1.5">
+                {tagList(settings, books, 'tropes').map((m) => <button key={m} type="button" className={`chip ${(b.tropes || []).includes(m) ? '!border-accent text-accent' : ''}`} onClick={() => set({ tropes: toggle(b.tropes || [], m) })}>{m}</button>)}
+              </div>
+            </Field>
+            <Field label="Content warnings">
+              <div className="flex flex-wrap gap-1.5">
+                {tagList(settings, books, 'warnings').map((m) => <button key={m} type="button" className={`chip ${(b.contentWarnings || []).includes(m) ? '!border-red-500 text-red-500' : ''}`} onClick={() => set({ contentWarnings: toggle(b.contentWarnings || [], m) })}>{m}</button>)}
               </div>
             </Field>
           </div>

@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { sampleBooks, sampleCollections, defaultSettings, sampleChallenges, sampleTasks } from './sampleData.js'
 import { DEFAULT_RATES } from './currency.js'
-import { uid, todayStr, blankBook, migrateBook, syncYears, SCHEMA_VERSION, unitTotal } from './utils.js'
+import { uid, todayStr, blankBook, migrateBook, syncYears, SCHEMA_VERSION, unitTotal, tagList, TAG_FIELD } from './utils.js'
 import { titleKey } from './groups.js'
 import * as gh from './github.js'
 
@@ -58,12 +58,12 @@ const statusPatch = (b, status, extra = {}) => {
   const t = todayStr()
   const y = new Date().getFullYear()
   if (status === 'bought' && !b.yearBought && b.status === 'wishlist') p.yearBought = y
-  if (status === 'reading') {
+  if (status === 'reading' || status === 'paused') {
     if (!b.startDate) {
       p.startDate = t
       p.yearStarted = y
     }
-    if (b.status === 'finished') {
+    if (b.status === 'finished' && status === 'reading') {
       p.currentPage = 0
       p.finishDate = ''
       p.yearFinished = ''
@@ -93,6 +93,8 @@ export function StoreProvider({ children }) {
   const timer = useRef(null)
   const dataRef = useRef(data)
   dataRef.current = data
+  const undoRef = useRef([]) // earlier snapshots of the library (in memory only), for Ctrl+Z
+  const undoAt = useRef(0)
 
   const flash = useCallback((msg, kind = 'info') => {
     setToast({ id: Date.now(), msg, kind })
@@ -127,6 +129,7 @@ export function StoreProvider({ children }) {
   }
 
   const applyRemote = (remote) => {
+    undoRef.current = []
     const base = freshData()
     // theme + mode are per-visit display choices: keep what is on screen
     const { theme, mode } = dataRef.current.settings
@@ -329,6 +332,13 @@ export function StoreProvider({ children }) {
         flash('Still loading from GitHub — try again in a moment', 'error')
         return false
       }
+      // one undo step per burst of edits (typing in a field counts as one)
+      const now = Date.now()
+      if (now - undoAt.current > 900) {
+        undoRef.current.push(dataRef.current)
+        if (undoRef.current.length > 40) undoRef.current.shift()
+      }
+      undoAt.current = now
       dirtyRef.current = true
       setData((d) => fn(d))
       return true
@@ -394,6 +404,54 @@ export function StoreProvider({ children }) {
       setTasks: (fn) => mutate((d) => ({ ...d, tasks: fn(d.tasks) })),
       setPlanned: (fn) => mutate((d) => ({ ...d, planned: fn(d.planned) })),
       setTournament: (t) => mutate((d) => ({ ...d, tournament: t })),
+      // ----- characters (stored on the volume they belong to) -----
+      saveCharacter: (bookId, char, fromBookId) =>
+        mutate((d) => {
+          const from = fromBookId || bookId
+          let books = d.books
+          if (from !== bookId) books = books.map((b) => (b.id === from ? { ...b, characters: (b.characters || []).filter((c) => c.id !== char.id), relations: (b.relations || []).filter((r) => r.from !== char.id && r.to !== char.id) } : b))
+          books = books.map((b) => {
+            if (b.id !== bookId) return b
+            const list = b.characters || []
+            const i = list.findIndex((c) => c.id === char.id)
+            if (i >= 0) return { ...b, characters: list.map((c) => (c.id === char.id ? { ...c, ...char } : c)) }
+            const n = list.length
+            return { ...b, characters: [...list, { x: 30 + (n % 4) * 160, y: 30 + Math.floor(n / 4) * 100, ...char }] }
+          })
+          return { ...d, books }
+        }),
+      deleteCharacter: (bookId, charId) =>
+        mutate((d) => ({ ...d, books: d.books.map((b) => (b.id === bookId ? { ...b, characters: (b.characters || []).filter((c) => c.id !== charId), relations: (b.relations || []).filter((r) => r.from !== charId && r.to !== charId) } : b)) })),
+      // ----- tags & labels (genres / moods / tropes / content warnings) -----
+      addTag: (kind, name) =>
+        mutate((d) => {
+          const cur = tagList(d.settings, d.books, kind)
+          if (cur.some((t) => t.toLowerCase() === name.toLowerCase())) return d
+          return { ...d, settings: { ...d.settings, tags: { ...(d.settings.tags || {}), [kind]: [...cur, name] } } }
+        }),
+      renameTag: (kind, from, to) =>
+        mutate((d) => {
+          const f = TAG_FIELD[kind]
+          const cur = tagList(d.settings, d.books, kind).map((t) => (t.toLowerCase() === from.toLowerCase() ? to : t))
+          const books = d.books.map((b) => ((b[f] || []).some((t) => t.toLowerCase() === from.toLowerCase()) ? { ...b, [f]: [...new Set(b[f].map((t) => (t.toLowerCase() === from.toLowerCase() ? to : t)))] } : b))
+          return { ...d, books, settings: { ...d.settings, tags: { ...(d.settings.tags || {}), [kind]: [...new Map(cur.map((t) => [t.toLowerCase(), t])).values()] } } }
+        }),
+      deleteTag: (kind, name) =>
+        mutate((d) => {
+          const f = TAG_FIELD[kind]
+          const cur = tagList(d.settings, d.books, kind).filter((t) => t.toLowerCase() !== name.toLowerCase())
+          const books = d.books.map((b) => ((b[f] || []).some((t) => t.toLowerCase() === name.toLowerCase()) ? { ...b, [f]: b[f].filter((t) => t.toLowerCase() !== name.toLowerCase()) } : b))
+          return { ...d, books, settings: { ...d.settings, tags: { ...(d.settings.tags || {}), [kind]: cur } } }
+        }),
+      undo: () => {
+        const prev = undoRef.current.pop()
+        if (!prev) return false
+        undoAt.current = 0
+        dirtyRef.current = true
+        setData(prev)
+        return true
+      },
+      canUndo: () => undoRef.current.length > 0,
       resetDemo: () => {
         dirtyRef.current = true
         setReadOnly(false)

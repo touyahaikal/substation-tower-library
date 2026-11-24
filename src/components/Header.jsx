@@ -56,7 +56,7 @@ export default function Header() {
       <div className="h-display text-base sm:text-lg font-semibold mr-auto hidden md:block">Welcome back, {settings.name}</div>
       <div className="relative flex-1 min-w-[140px] max-w-xs">
         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-        <input className="input !pl-8" placeholder="Search books…" value={search} onChange={(e) => onSearch(e.target.value)} />
+        <input id="global-search" className="input !pl-8" placeholder="Search books…  ( / )" value={search} onChange={(e) => onSearch(e.target.value)} />
       </div>
       <div className="flex items-stretch">
         <button

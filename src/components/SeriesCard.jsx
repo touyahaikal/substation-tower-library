@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { ChevronDown, ChevronRight, EyeOff, Eye, Plus, Pencil, Upload, Layers, Star, X } from 'lucide-react'
-import { Modal, Field, Cover, ProgressBar, RatingInput } from './ui.jsx'
+import { Modal, Field, Cover, ProgressBar, RatingInput, RatingBadge } from './ui.jsx'
+import { StatusActions, StatusFrame, BadgedCover } from './StatusUI.jsx'
 import { DeleteButton } from './Confirm.jsx'
 import QuickPage from './QuickPage.jsx'
 import { useStore } from '../lib/store.jsx'
@@ -96,7 +97,7 @@ export function useVolumeGenerator() {
 }
 
 // ---------- Quick-update drawer for one volume ----------
-function VolumeDrawer({ id, onClose }) {
+export function VolumeDrawer({ id, onClose }) {
   const { books, actions, flash } = useStore()
   const { openBook, setBookModal } = useNav()
   const fileRef = useRef(null)
@@ -120,7 +121,8 @@ function VolumeDrawer({ id, onClose }) {
         <Cover book={b} size="md" />
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex flex-wrap gap-1.5">{STATUSES.map((s) => <button key={s.id} className={`btn !py-1 text-xs ${b.status === s.id ? 'btn-primary' : ''}`} onClick={() => actions.setStatus(b.id, s.id)}>{s.label}</button>)}</div>
-          {(b.status === 'reading' || b.status === 'bought') && <div><div className="label">Page</div><QuickPage book={b} /></div>}
+          <StatusActions book={b} small />
+          {(b.status === 'reading' || b.status === 'paused' || b.status === 'bought') && <div><div className="label">Page</div><QuickPage book={b} /></div>}
           <div><div className="label">Rating</div><RatingInput value={b.review.rating} onChange={(rating) => upd({ review: { ...b.review, rating } })} /></div>
         </div>
       </div>
@@ -162,11 +164,11 @@ function RangeStatus({ ed }) {
 }
 
 // ---------- One edition: header, progress, tile grid, controls ----------
-function EditionBlock({ ed, primary, startAdd, openDrawer }) {
+export function EditionBlock({ ed, primary, startAdd, openDrawer, bulkDefault }) {
   const n = ed.entries.length
   const isSingle = n === 1 && volNum(ed.entries[0]) == null
   const [open, setOpen] = useState(true)
-  const [bulk, setBulk] = useState(primary && !isSingle)
+  const [bulk, setBulk] = useState(bulkDefault ?? (primary && !isSingle))
   return (
     <div>
       <div className="flex items-center gap-2 flex-wrap">
@@ -178,7 +180,7 @@ function EditionBlock({ ed, primary, startAdd, openDrawer }) {
           {!isSingle && <button className={`btn !py-1 text-xs ${bulk ? 'btn-primary' : ''}`} onClick={() => setBulk(!bulk)}>Bulk status</button>}
         </div>
       </div>
-      <ProgressBar value={n ? ed.entries.reduce((s, b) => s + (b.status === 'finished' ? 1 : b.status === 'reading' ? Math.min(0.99, (b.currentPage || 0) / (b.pages || 1)) : 0), 0) / n : 0} className="mt-2" />
+      <ProgressBar value={n ? ed.entries.reduce((s, b) => s + (b.status === 'finished' ? 1 : (b.status === 'reading' || b.status === 'paused') ? Math.min(0.99, (b.currentPage || 0) / (b.pages || 1)) : 0), 0) / n : 0} className="mt-2" />
       {bulk && <RangeStatus ed={ed} />}
       {open && (
         <div className="flex flex-wrap gap-1.5 mt-3">
@@ -197,7 +199,7 @@ function EditionBlock({ ed, primary, startAdd, openDrawer }) {
 // ---------- The unified card ----------
 export default function SeriesCard({ group, defaultOpen = true, selected, onSelect }) {
   const { actions, flash } = useStore()
-  const { openBook } = useNav()
+  const { openTitle } = useNav()
   const [open, setOpen] = useState(defaultOpen)
   const [drawer, setDrawer] = useState(null)
   const [startAdd, genEl] = useVolumeGenerator()
@@ -207,19 +209,21 @@ export default function SeriesCard({ group, defaultOpen = true, selected, onSele
   const toggleHide = () => { if (actions.setHidden(ids, !group.hidden)) flash(group.hidden ? `Unhid '${group.title}'` : `Hid '${group.title}'`, 'success') }
 
   return (
-    <section className={`panel p-4 ${group.hidden ? 'opacity-70' : ''}`}>
+    <StatusFrame status={group.status} favorite={group.favorite} progress={group.progress} hidden={group.hidden}>
       <div className="flex gap-4">
         {onSelect && <input type="checkbox" className="mt-1 accent-[rgb(var(--accent))]" checked={!!selected} onChange={onSelect} aria-label="Select" />}
-        <Cover book={group.cover} size="md" onClick={() => openBook(group.cover.id)} />
+        <BadgedCover book={group.cover} status={group.status} progress={group.progress} size="md" onClick={() => openTitle(group.key)} />
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2 flex-wrap">
             <div className="min-w-0 flex-1">
-              <h3 className="h-display text-lg font-semibold leading-tight truncate">{group.title}</h3>
+              <h3 className="h-display text-lg font-semibold leading-tight truncate"><button className="hover:text-accent text-left max-w-full truncate" onClick={() => openTitle(group.key)} title="Open title page">{group.title}</button></h3>
               <div className="text-sm text-muted truncate">{group.author}</div>
+              {group.status === 'finished' && group.rating > 0 && <div className="mt-0.5"><RatingBadge value={group.rating} /></div>}
             </div>
             <div className="flex gap-1 flex-wrap items-center">
               <button className="btn btn-ghost !p-1.5" onClick={toggleHide} title={group.hidden ? 'Unhide series' : 'Hide series'} aria-label={group.hidden ? 'Unhide series' : 'Hide series'}>{group.hidden ? <Eye size={15} /> : <EyeOff size={15} />}</button>
               <DeleteButton prompt="Confirm Delete Series?" onConfirm={() => { if (actions.deleteBooks(ids)) flash(`Deleted '${group.title}' (${total} entr${total === 1 ? 'y' : 'ies'})`, 'success') }} />
+              <button className="btn btn-ghost !text-xs !py-1" onClick={() => openTitle(group.key)}>Open title page</button>
               <button className="btn btn-ghost !p-1.5" onClick={() => setOpen(!open)} aria-label={open ? 'Collapse card' : 'Expand card'}>{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</button>
             </div>
           </div>
@@ -253,6 +257,7 @@ export default function SeriesCard({ group, defaultOpen = true, selected, onSele
             <span className="vtile vtile-wishlist !h-5 !min-w-0 !px-2 !text-[10px] cursor-default">Wishlist</span>
             <span className="vtile vtile-bought !h-5 !min-w-0 !px-2 !text-[10px] cursor-default">Bought</span>
             <span className="vtile vtile-reading !h-5 !min-w-0 !px-2 !text-[10px] cursor-default">Reading</span>
+            <span className="vtile vtile-paused !h-5 !min-w-0 !px-2 !text-[10px] cursor-default">Paused</span>
             <span className="vtile vtile-finished !h-5 !min-w-0 !px-2 !text-[10px] cursor-default">Finished</span>
             <span>Tap a volume to update it.</span>
           </div>
@@ -260,6 +265,6 @@ export default function SeriesCard({ group, defaultOpen = true, selected, onSele
       )}
       {drawer && <VolumeDrawer id={drawer} onClose={() => setDrawer(null)} />}
       {genEl}
-    </section>
+    </StatusFrame>
   )
 }

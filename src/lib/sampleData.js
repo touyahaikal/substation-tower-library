@@ -54,7 +54,7 @@ export const sampleBooks = () => [
     readingLog: [{ id: 'l14', date: d(8, 5), pages: 130 }, { id: 'l15', date: d(8, 15), pages: 140 }, { id: 'l16', date: d(8, 24), pages: 123 }],
   }),
   mk({
-    id: 'b6', title: 'The Name of the Wind', author: 'Patrick Rothfuss', genres: ['Fantasy'], pages: 662, status: 'reading', currentPage: 241,
+    id: 'b6', title: 'The Name of the Wind', author: 'Patrick Rothfuss', genres: ['Fantasy'], pages: 662, status: 'paused', currentPage: 241,
     startDate: d(10, 28), readWhere: 'Owned', currency: 'MYR', price: 55, series: 'The Kingkiller Chronicle', seriesNumber: 1, seriesTotal: 3,
     cover: { color: '#4B3F72', style: 'frame' }, moods: ['Whimsical', 'Adventurous'],
     summary: 'The tale of Kvothe, told in his own words.',
@@ -94,6 +94,7 @@ export const sampleBooks = () => [
       startDate: status === 'finished' || status === 'reading' ? d(2, 1 + i) : '', finishDate: status === 'finished' ? d(2, 3 + i) : '',
       cover: { color: '#3F4B5B', style: 'diagonal' }, reads: status === 'finished' ? 1 : 0,
       review: status === 'finished' ? { rating: n === 1 ? 4.5 : 4 } : {},
+      characters: CHARS[n] || [],
     })
   ),
   ...[[1, 'finished'], [2, 'bought'], [3, 'wishlist']].map(([n, status], i) =>
@@ -102,9 +103,20 @@ export const sampleBooks = () => [
       pages: 264, status, volume: n, yearReleased: 2016, currency: 'MYR', price: status === 'wishlist' ? 0 : 39.9,
       currentPage: status === 'finished' ? 264 : 0, startDate: status === 'finished' ? d(3, 1) : '', finishDate: status === 'finished' ? d(3, 20) : '',
       cover: { color: '#4B3F72', style: 'frame' }, reads: status === 'finished' ? 1 : 0, review: status === 'finished' ? { rating: 4 } : {},
+      characters: n === 1 ? [{ id: 'ch-n1-a', name: 'Captain Haru', avatar: 'olderman', role: 'Mentor', desc: 'Veteran of the sky wars.', aka: 'The Old Hawk', group: 'Wind Corps', age: '58', firstAppearance: 'Chapter 2', quote: 'Fly lower than your fear.', x: 30, y: 30 }] : [],
     })
   ),
 ]
+
+const CHARS = {
+  1: [
+    { id: 'ch-m1-a', name: 'Rin Takeda', avatar: 'girl', role: 'Protagonist', desc: 'A stubborn apprentice swordswoman.', aka: 'Sky Rin', group: 'Wind Corps', age: '16', firstAppearance: 'Chapter 1', quote: 'I will cut the sky open.', x: 30, y: 30 },
+    { id: 'ch-m1-b', name: 'Kaito', avatar: 'boy', role: 'Love interest', desc: 'Quiet rival from the northern academy.', aka: '', group: 'North Academy', age: '17', firstAppearance: 'Chapter 3', quote: '', x: 190, y: 30 },
+  ],
+  2: [
+    { id: 'ch-m2-a', name: 'Lady Sora', avatar: 'woman', role: 'Antagonist', desc: 'Warden of the storm gate.', aka: 'The Gale Queen', group: 'Storm Gate', age: '', firstAppearance: 'Chapter 7', quote: 'No one passes in daylight.', x: 30, y: 30 },
+  ],
+}
 
 export const sampleCollections = () => [
   { id: 'col1', name: 'Comfort Reads', type: 'custom', bookIds: ['b1', 'b3', 'b9'] },
@@ -123,6 +135,8 @@ export const defaultSettings = () => ({
   ratesUpdated: null,
   visitorPublicEnabled: true,
   pixelIcon: 'heart',
+  defaultLanguage: 'English',
+  tags: null, // null = built-in tag lists; the Tags & labels manager saves its own
 })
 
 export const sampleChallenges = () => [

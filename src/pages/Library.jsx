@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { StretchHorizontal, List as ListIcon, LayoutGrid, ClipboardPaste, Eye, EyeOff, Pencil, Layers, ChevronDown, ChevronRight, ChevronsUp, Heart, Search } from 'lucide-react'
+import { StatusActions, StatusFrame, BadgedCover, CornerBadge } from '../components/StatusUI.jsx'
 import { Card, Cover, Modal, PageTitle, Tabs, ProgressBar, RatingBadge, Empty } from '../components/ui.jsx'
 import { DeleteButton } from '../components/Confirm.jsx'
 import QuickPage from '../components/QuickPage.jsx'
@@ -7,7 +8,7 @@ import SeriesCard, { useVolumeGenerator } from '../components/SeriesCard.jsx'
 import SpendingBreakdown from '../components/SpendingBreakdown.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { STATUSES, statusLabel, displayTitle, progressOf, unitTotal, unitSuffix } from '../lib/utils.js'
+import { STATUSES, statusLabel, statusColor, displayTitle, progressOf, unitTotal, unitSuffix } from '../lib/utils.js'
 import { buildGroups } from '../lib/groups.js'
 import { fmtMoney } from '../lib/currency.js'
 
@@ -43,7 +44,7 @@ function PasteList({ onClose }) {
 function Chips({ b }) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      <span className="chip !border-accent text-accent">{statusLabel(b.status)}</span>
+      <span className="chip font-semibold" style={{ color: statusColor(b.status), borderColor: statusColor(b.status) }}>{statusLabel(b.status)}</span>
       {b.edition && <span className="chip">{b.edition}</span>}
       {b.language && <span className="chip">{b.language}</span>}
       {(b.genres || []).map((g) => <span key={g} className="chip">{g}</span>)}
@@ -54,7 +55,7 @@ function Chips({ b }) {
 }
 
 function Progress({ b }) {
-  if (b.status !== 'reading' && b.status !== 'finished') return null
+  if (b.status !== 'reading' && b.status !== 'paused' && b.status !== 'finished') return null
   const total = unitTotal(b)
   const cur = b.status === 'finished' ? total : Number(b.currentPage) || 0
   return (
@@ -84,36 +85,38 @@ function EntryActions({ b, onAddVolumes, iconOnly }) {
   )
 }
 
-const isActive = (b) => b.status === 'reading' || b.status === 'bought'
+const isActive = (b) => b.status === 'reading' || b.status === 'paused' || b.status === 'bought'
 
 // ---------------------------------------------------------------- layout 1: Cards
 function EntryCard({ b, selected, onSelect, addVolumes }) {
   const { openBook } = useNav()
   return (
-    <section className={`panel p-4 ${b.hidden ? 'opacity-70' : ''}`}>
+    <StatusFrame status={b.status} favorite={b.favorite} progress={progressOf(b)} hidden={b.hidden}>
       <div className="flex gap-4">
         <input type="checkbox" className="mt-1 accent-[rgb(var(--accent))]" checked={!!selected} onChange={onSelect} aria-label="Select" />
-        <Cover book={b} size="md" onClick={() => openBook(b.id)} />
+        <BadgedCover book={b} size="md" onClick={() => openBook(b.id)} />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h3 className="h-display text-lg font-semibold leading-tight">{displayTitle(b)}</h3>
               <div className="text-sm text-muted">{b.author}</div>
+              {b.status === 'finished' && <div className="mt-0.5"><RatingBadge value={b.review?.rating} /></div>}
             </div>
             <div className="text-right shrink-0">
-              <RatingBadge value={b.review?.rating} />
-              {b.favorite && <Heart size={13} className="text-accent fill-accent inline ml-2" />}
+              {b.status !== 'finished' && <RatingBadge value={b.review?.rating} />}
+              {b.favorite && b.status !== 'finished' && <Heart size={13} className="text-accent fill-accent inline ml-2" />}
               {b.price > 0 && b.status !== 'wishlist' && <div className="text-xs font-mono text-muted mt-0.5">{fmtMoney(b.price, b.currency)}</div>}
             </div>
           </div>
           <div className="mt-2"><Chips b={b} /></div>
           <Progress b={b} />
           {isActive(b) && <QuickPage book={b} className="mt-2" />}
+          <StatusActions book={b} small className="mt-2" />
           {b.notesText && <p className="text-xs text-muted mt-2 line-clamp-2">{b.notesText}</p>}
           <div className="mt-3"><EntryActions b={b} onAddVolumes={addVolumes} /></div>
         </div>
       </div>
-    </section>
+    </StatusFrame>
   )
 }
 
@@ -121,14 +124,14 @@ function EntryCard({ b, selected, onSelect, addVolumes }) {
 function EntryRow({ b, selected, onSelect, addVolumes }) {
   const { openBook } = useNav()
   return (
-    <div className={`panel p-3 flex gap-3 items-center flex-wrap sm:flex-nowrap ${b.hidden ? 'opacity-70' : ''}`}>
+    <div className={`panel p-3 flex gap-3 items-center flex-wrap sm:flex-nowrap ${b.hidden ? 'opacity-70' : ''}`} style={{ borderTop: `3px solid ${statusColor(b.status)}` }}>
       <input type="checkbox" className="accent-[rgb(var(--accent))]" checked={!!selected} onChange={onSelect} aria-label="Select" />
-      <Cover book={b} size="sm" onClick={() => openBook(b.id)} />
+      <BadgedCover book={b} size="sm" onClick={() => openBook(b.id)} />
       <div className="flex-1 min-w-[10rem]">
         <button className="font-semibold text-left hover:text-accent block max-w-full truncate" onClick={() => openBook(b.id)}>{displayTitle(b)}</button>
         <div className="text-sm text-muted truncate">{b.author}</div>
         <div className="flex gap-1 mt-1 flex-wrap items-center">
-          <span className="chip !border-accent text-accent">{statusLabel(b.status)}</span>
+          <span className="chip font-semibold" style={{ color: statusColor(b.status), borderColor: statusColor(b.status) }}>{statusLabel(b.status)}</span>
           <span className="chip">{b.edition}</span>
           {b.language && <span className="chip hidden md:inline-flex">{b.language}</span>}
           {b.hidden && <span className="chip">Hidden</span>}
@@ -148,16 +151,18 @@ function EntryRow({ b, selected, onSelect, addVolumes }) {
 // A series / multi-edition group shown as one compact row that expands into the full series card
 function GroupRow({ g, open, onToggle, selected, onSelect }) {
   const { actions, flash } = useStore()
+  const { openTitle } = useNav()
   const ids = g.entries.map((b) => b.id)
   return (
     <div>
-      <div className={`panel p-3 flex gap-3 items-center flex-wrap sm:flex-nowrap ${g.hidden ? 'opacity-70' : ''}`}>
+      <div className={`panel p-3 flex gap-3 items-center flex-wrap sm:flex-nowrap ${g.hidden ? 'opacity-70' : ''}`} style={{ borderTop: `3px solid ${statusColor(g.status)}` }}>
         <input type="checkbox" className="accent-[rgb(var(--accent))]" checked={!!selected} onChange={onSelect} aria-label="Select" />
-        <Cover book={g.cover} size="sm" onClick={onToggle} />
+        <BadgedCover book={g.cover} status={g.status} progress={g.progress} size="sm" onClick={onToggle} />
         <div className="flex-1 min-w-[10rem]">
-          <button className="font-semibold text-left hover:text-accent block max-w-full truncate" onClick={onToggle}>{g.title}</button>
+          <button className="font-semibold text-left hover:text-accent block max-w-full truncate" onClick={() => openTitle(g.key)} title="Open title page">{g.title}</button>
           <div className="text-sm text-muted truncate">{g.author}</div>
           <div className="flex gap-1 mt-1 flex-wrap">
+            <span className="chip font-semibold" style={{ color: statusColor(g.status), borderColor: statusColor(g.status) }}>{statusLabel(g.status)}</span>
             <span className="chip"><Layers size={11} className="mr-1" />{g.entries.length} {g.entries.length === 1 ? 'entry' : 'volumes'}</span>
             {g.editions.map((e) => <span key={e.edition} className="chip">{e.edition}</span>)}
             {g.hidden && <span className="chip">Hidden</span>}
@@ -186,6 +191,7 @@ function Poster({ g, onToggle }) {
     <button type="button" onClick={onToggle} className={`text-left group ${g.hidden ? 'opacity-60' : ''}`} aria-label={`Expand ${g.title}`}>
       <div className="relative">
         <Cover book={b} size="md" className="!w-full !h-52 group-hover:!-translate-y-1 transition" />
+        <CornerBadge status={g.status} progress={g.progress} />
       </div>
       <div className="mt-2 text-sm font-semibold leading-tight truncate">{g.title}</div>
       <div className="text-xs text-muted truncate">{g.hidden ? 'Hidden · ' : ''}{g.isCollection ? `${g.entries.length} volumes · ${g.finished} finished` : statusLabel(b.status)}</div>
@@ -231,6 +237,7 @@ function PosterExpanded({ g, onCollapse, addVolumes }) {
           {b.notesText && <p className="text-sm mt-2 text-muted whitespace-pre-wrap border-l-2 border-line pl-3">{b.notesText}</p>}
           <Progress b={b} />
           {isActive(b) && <QuickPage book={b} className="mt-3" />}
+          <StatusActions book={b} small className="mt-2" />
           <div className="mt-3"><EntryActions b={b} onAddVolumes={addVolumes} /></div>
         </div>
       </div>
