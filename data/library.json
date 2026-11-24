@@ -6917,7 +6917,7 @@
   "planned": [],
   "settings": {
     "name": "Reader",
-    "theme": "substation",
+    "theme": "ttpd",
     "mode": "dark",
     "goalBooks": 24,
     "goalPages": 8000,
