@@ -670,8 +670,8 @@
           "id": "3fsgikp3lzzh",
           "name": "Hikaru",
           "note": "",
-          "x": 151.5914306640625,
-          "y": 113.30029296875
+          "x": 167.83123779296875,
+          "y": 106.84185791015625
         },
         {
           "id": "ld28c4yjmdnv",
@@ -681,14 +681,7 @@
           "y": 102.24932861328125
         }
       ],
-      "relations": [
-        {
-          "id": "5pj3n69imh3x",
-          "from": "ld28c4yjmdnv",
-          "to": "3fsgikp3lzzh",
-          "label": ""
-        }
-      ],
+      "relations": [],
       "vocab": [],
       "reads": 0,
       "addedAt": "2026-11-24T00:02:04.338Z"
