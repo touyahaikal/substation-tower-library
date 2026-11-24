@@ -681,7 +681,14 @@
           "y": 102.24932861328125
         }
       ],
-      "relations": [],
+      "relations": [
+        {
+          "id": "684wjc60muhn",
+          "from": "3fsgikp3lzzh",
+          "to": "ld28c4yjmdnv",
+          "label": "Lover"
+        }
+      ],
       "vocab": [],
       "reads": 0,
       "addedAt": "2026-11-24T00:02:04.338Z"
