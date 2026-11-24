@@ -681,7 +681,14 @@
           "y": 102.24932861328125
         }
       ],
-      "relations": [],
+      "relations": [
+        {
+          "id": "5pj3n69imh3x",
+          "from": "ld28c4yjmdnv",
+          "to": "3fsgikp3lzzh",
+          "label": ""
+        }
+      ],
       "vocab": [],
       "reads": 0,
       "addedAt": "2026-11-24T00:02:04.338Z"
