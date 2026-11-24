@@ -665,7 +665,15 @@
       "quotes": [],
       "notes": [],
       "readingLog": [],
-      "characters": [],
+      "characters": [
+        {
+          "id": "3fsgikp3lzzh",
+          "name": "Hikaru",
+          "note": "",
+          "x": 30,
+          "y": 30
+        }
+      ],
       "relations": [],
       "vocab": [],
       "reads": 0,
