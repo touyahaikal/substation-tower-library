@@ -163,10 +163,10 @@ function RangeStatus({ ed }) {
 
 // ---------- One edition: header, progress, tile grid, controls ----------
 function EditionBlock({ ed, primary, startAdd, openDrawer }) {
-  const [open, setOpen] = useState(primary)
-  const [bulk, setBulk] = useState(false)
   const n = ed.entries.length
   const isSingle = n === 1 && volNum(ed.entries[0]) == null
+  const [open, setOpen] = useState(true)
+  const [bulk, setBulk] = useState(primary && !isSingle)
   return (
     <div>
       <div className="flex items-center gap-2 flex-wrap">
@@ -174,7 +174,7 @@ function EditionBlock({ ed, primary, startAdd, openDrawer }) {
         <span className="chip !border-accent text-accent font-semibold">{ed.edition}</span>
         <span className="text-xs text-muted font-mono">{isSingle ? statusLabel(ed.entries[0].status) : `${ed.finished}/${n} volumes finished`}{ed.pages > 0 && ` · ${ed.pagesRead.toLocaleString()}/${ed.pages.toLocaleString()} pages`}</span>
         <div className="ml-auto flex gap-1.5 flex-wrap">
-          <button className="btn !py-1 text-xs" onClick={() => startAdd(ed.entries)}><Plus size={13} /> {isSingle ? 'Add volumes' : 'Add more volumes'}</button>
+          <button className="btn !py-1 text-xs" onClick={() => startAdd(ed.entries)}>{isSingle ? '+ Add volumes' : 'Add more volumes'}</button>
           {!isSingle && <button className={`btn !py-1 text-xs ${bulk ? 'btn-primary' : ''}`} onClick={() => setBulk(!bulk)}>Bulk status</button>}
         </div>
       </div>

@@ -88,3 +88,7 @@ src/
 public/config.json        optional visitor source
 .github/workflows/deploy.yml
 ```
+
+## Unified title cards
+
+Every entry with the same title (case-insensitive, extra spaces ignored) forms one card in **Cards**, **List** and **Covers**. The largest format (most volumes, then most pages) is the main edition with bulk range status and its tile grid; other formats sit under **Other formats**, separated by dashed lines, each with its own tiles and **+ Add volumes** when it is a single entry. Search and filters match if any volume or format matches.

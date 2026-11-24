@@ -308,7 +308,7 @@ export default function Library() {
     if (g.isCollection) {
       return view === 'list'
         ? <GroupRow key={g.key} g={g} open={expanded.has(g.key)} onToggle={() => toggleOpen(g.key)} selected={isSel(g)} onSelect={() => toggleSel(g)} />
-        : <SeriesCard key={g.key} group={g} defaultOpen={false} selected={isSel(g)} onSelect={() => toggleSel(g)} />
+        : <SeriesCard key={g.key} group={g} defaultOpen selected={isSel(g)} onSelect={() => toggleSel(g)} />
     }
     const b = g.entries[0]
     return view === 'list'

@@ -2,7 +2,7 @@
 // Inside a group, entries are split by edition/format; volume entries sort numerically so 0 and 0.5 come first.
 import { progressOf, ratingOf } from './utils.js'
 
-export const titleKey = (t) => (t || '').trim().toLowerCase()
+export const titleKey = (t) => String(t || '').normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase()
 export const volNum = (b) => (b.volume == null || b.volume === '' ? null : Number(b.volume))
 export const byVolume = (a, b) => {
   const x = volNum(a), y = volNum(b)
