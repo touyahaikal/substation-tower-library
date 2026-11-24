@@ -69,7 +69,7 @@
       "addedAt": "2026-11-23T10:11:19.758Z"
     },
     {
-      "id": "zxgc1ugcvnm6",
+      "id": "79pgc4qjjwvy",
       "title": "Tomorrow, and Tomorrow, and Tomorrow",
       "author": "Gabrielle Zevin",
       "summary": "",
@@ -1222,8 +1222,8 @@
   "planned": [],
   "settings": {
     "name": "Reader",
-    "theme": "substation",
-    "mode": "dark",
+    "theme": "ttpd",
+    "mode": "light",
     "goalBooks": 24,
     "goalPages": 8000,
     "primaryCurrency": "MYR",
