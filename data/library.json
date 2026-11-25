@@ -237,7 +237,7 @@
       "hidden": false,
       "volume": 1,
       "volumeLabel": "",
-      "isSeriesCover": false,
+      "isSeriesCover": true,
       "status": "finished",
       "priority": "Want to Read",
       "startDate": "2021-07-01",
@@ -9517,7 +9517,7 @@
   "planned": [],
   "settings": {
     "name": "Ode",
-    "theme": "substation",
+    "theme": "ttpd",
     "mode": "light",
     "goalBooks": 24,
     "goalPages": 8000,
