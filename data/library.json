@@ -3616,7 +3616,7 @@
       "yearStarted": "",
       "yearFinished": "",
       "hidden": false,
-      "volume": null,
+      "volume": 1,
       "volumeLabel": "",
       "isSeriesCover": false,
       "status": "wishlist",
