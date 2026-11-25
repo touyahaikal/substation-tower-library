@@ -789,7 +789,7 @@
       "hidden": false,
       "volume": 1,
       "volumeLabel": "",
-      "isSeriesCover": false,
+      "isSeriesCover": true,
       "status": "bought",
       "priority": "Want to Read",
       "startDate": "",
