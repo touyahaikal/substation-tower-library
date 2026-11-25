@@ -5845,7 +5845,13 @@
       "year": 2026
     }
   ],
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "7cx9vt7yx47n",
+      "text": "Read and journaling more in Tortured Poets",
+      "done": false
+    }
+  ],
   "readDays": [
     "2026-11-23",
     "2026-11-22"
