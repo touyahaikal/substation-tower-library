@@ -51,7 +51,7 @@ export default function Calendar() {
                 className={`aspect-square sm:aspect-[4/3] border text-left p-1 flex flex-col hover:border-accent transition rounded-[var(--radius)] ${date === today ? 'border-accent' : 'border-line'}`}>
                 <span className={`text-xs font-mono ${date === today ? 'text-accent font-bold' : 'text-muted'}`}>{n}</span>
                 <div className="flex gap-0.5 mt-auto flex-wrap">
-                  {read.slice(0, 3).map((b) => <Cover key={b.id} book={b} size="xs" className="!w-4 !h-6" />)}
+                  {read.slice(0, 3).map((b) => <Cover key={b.id} book={b} size="xs" className="!w-4" />)}
                   {plans.slice(0, 2).map((p) => <span key={p.id} className="text-[9px] border border-dashed border-accent text-accent px-0.5 rounded">plan</span>)}
                 </div>
               </button>

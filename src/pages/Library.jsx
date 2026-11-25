@@ -190,7 +190,7 @@ function Poster({ g, onToggle }) {
   return (
     <button type="button" onClick={onToggle} className={`text-left group ${g.hidden ? 'opacity-60' : ''}`} aria-label={`Expand ${g.title}`}>
       <div className="relative">
-        <Cover book={b} size="md" className="!w-full !h-52 group-hover:!-translate-y-1 transition" />
+        <Cover book={b} size="md" className="!w-full group-hover:!-translate-y-1 transition" />
         <CornerBadge status={g.status} progress={g.progress} />
       </div>
       <div className="mt-2 text-sm font-semibold leading-tight truncate">{g.title}</div>
@@ -377,7 +377,7 @@ export default function Library() {
       {list.length === 0 ? (
         <Empty>{books.length === 0 ? 'Your library is empty. Press N or use “New entry” to add your first book.' : hiddenCount > 0 && !showHidden ? 'No entries match. Some entries are hidden; switch on “Show Hidden” to see them.' : 'No entries match these filters.'}</Empty>
       ) : view === 'covers' ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-5">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-5 items-start">
           {list.map((g) => (expanded.has(g.key)
             ? <PosterExpanded key={g.key} g={g} onCollapse={() => closeOne(g.key)} addVolumes={startAdd} />
             : <Poster key={g.key} g={g} onToggle={() => toggleOpen(g.key)} />))}

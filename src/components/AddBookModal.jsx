@@ -45,7 +45,7 @@ export default function AddBookModal({ initial, defaults, onClose }) {
     e.target.value = ''
     if (!f) return
     try {
-      const url = await compressImage(f, { maxWidth: 400, quality: 0.8 })
+      const url = await compressImage(f)
       setCover({ url })
       flash(`Cover resized and compressed (${Math.round(url.length / 1024)} KB)`, 'success')
     } catch (err) {

@@ -65,7 +65,7 @@ Anyone who opens the site without logging in sees **Guest Mode**. The app loads 
 
 - **New entry:** header button, a floating **+ New entry** button on every page, or press **N** (when you aren't typing in a field). Saving always gives feedback: a red toast and a highlighted Title if it's missing, or *Saved 'Title' to library*.
 - **Fields:** title, author, genres (comma-separated plus tap-to-toggle pills), language, edition/format (dropdown + custom), total/current page, status (Wishlist / Bought / Currently Reading / Finished), rating 0–100 (slider + number), price with currency, notes, and year released / bought / started / finished.
-- **Covers:** paste a URL or upload a file. Uploads are resized on a canvas to max 400 px wide and saved as WebP (JPEG fallback, quality 0.8), typically 5–30 KB, so `library.json` stays small.
+- **Covers:** paste a URL or upload a file. Uploads are scaled proportionally on a canvas (longest side max 450 px, original width:height kept, never cropped or stretched) and saved as WebP (JPEG fallback, quality 0.82), typically 5–40 KB, so `library.json` stays small.
 - **Library:** live search (title, author, genre, language, notes), sort (Newest, Title, Author, Progress, Rating, Year released), filters (genre, language, status tabs) and a **Show Hidden** switch. Layouts: **Cards**, **List**, **Covers** (tap a poster to expand it inline; **Collapse** / **Collapse All**).
 - **Quick page update:** type a page or tap −10 / −1 / +1 / +10, then **Save**. Reaching the last page marks it Finished; any progress on a Wishlist/Bought entry starts it.
 - **No browser popups:** deleting and bulk actions use in-page confirmations (an inline *Confirm Delete?* bar or an in-app dialog) and toasts. `window.confirm` / `window.alert` are never used.
@@ -100,3 +100,7 @@ Every entry with the same title (case-insensitive, extra spaces ignored) forms o
 - **Two levels:** click a title card to open its **Official Title page** (series cover picker, overall progress, bulk range status, Add volumes, Hide, Delete, tabs Volumes / Databooks / Light Novels / Other Formats). Click a volume to open its **book page** with breadcrumb, Prev Vol / Next Vol, status pills, 0–100 score, metadata pills, collapsible About, and Review / Quotes / Notes / Reading Log / Characters / Mood & Tropes.
 - **Characters:** filter by Official Title and then by volume/edition; each card shows a volume badge. The Add/Edit modal has avatar tiles and all character fields, plus an "Unsaved changes" indicator.
 - **Preferences → Tags & labels:** manage Genres, Moods, Tropes and Content warnings with live usage counts, inline rename/delete and + Add. **About** lists shortcuts: `N` add a book, `/` search, `Ctrl+Z` undo (this session only), `Esc` close.
+
+## Covers
+
+Cover shape follows the Edition / Format: Manga and Light Novel `1/1.55`, Paperback / Hardcover / Novel `2/3`, Databook / Artbook / Omnibus `3/4`, Audiobook square, eBook and other formats follow the image's own ratio (`2/3` for generated covers). Images are always drawn `object-contain` inside a softly tinted, rounded frame, so the full front cover is visible everywhere (Library, Covers wall, title and book pages, Shelves, Home, Calendar).

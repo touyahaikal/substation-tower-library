@@ -24,11 +24,24 @@ export function Modal({ title, onClose, children, wide, footer }) {
   )
 }
 
-// CSS-rendered illustrated book cover
+// Cover shape follows the Edition / Format (full class names so Tailwind keeps them)
+export function coverAspect(book) {
+  const e = ((book && book.edition) || '').trim().toLowerCase()
+  if (/manga|light\s*novel/.test(e)) return { cls: 'aspect-[1/1.55]', natural: false }
+  if (/paperback|hardcover|novel/.test(e)) return { cls: 'aspect-[2/3]', natural: false }
+  if (/databook|artbook|omnibus/.test(e)) return { cls: 'aspect-[3/4]', natural: false }
+  if (/audio/.test(e)) return { cls: 'aspect-square', natural: false }
+  return { cls: 'aspect-[2/3]', natural: true } // eBook / other: follow the image's own ratio
+}
+
+// Book cover: shape by edition, uploaded images always object-contain (never cropped), generated cover for the rest
 export function Cover({ book, size = 'md', className = '', onClick }) {
-  const dims = { xs: 'w-8 h-12', sm: 'w-16 h-24', md: 'w-28 h-40', lg: 'w-40 h-56', xl: 'w-48 h-72' }[size]
+  const w = { xs: 'w-8', sm: 'w-16', md: 'w-28', lg: 'w-40', xl: 'w-48' }[size]
   const c = book.cover || {}
   const color = c.color || '#7C6F64'
+  const { cls, natural } = coverAspect(book)
+  const [seen, setSeen] = useState({ url: '', r: 0 }) // natural ratio of the loaded image, tied to its url
+  const ratio = seen.url === c.url ? seen.r : null
   const pattern = {
     solid: 'none',
     stripes: 'repeating-linear-gradient(0deg, rgb(255 255 255 / .12) 0 6px, transparent 6px 14px)',
@@ -37,14 +50,23 @@ export function Cover({ book, size = 'md', className = '', onClick }) {
     frame: 'linear-gradient(transparent, transparent)',
   }[c.style || 'solid']
   const showText = size !== 'xs'
+  const hasImg = !!c.url
   return (
     <div
       onClick={onClick}
-      className={`book-cover ${dims} shrink-0 rounded-sm ${onClick ? 'cursor-pointer hover:-translate-y-0.5 transition' : ''} ${className}`}
-      style={{ background: c.url ? `center/cover url("${c.url}")` : `${pattern}, ${color}` }}
+      className={`book-cover ${hasImg ? 'has-img' : ''} ${w} ${cls} shrink-0 rounded-md ${onClick ? 'cursor-pointer hover:-translate-y-0.5 transition' : ''} ${className}`}
+      style={{
+        background: hasImg ? `color-mix(in srgb, ${color} 14%, rgb(var(--card)))` : `${pattern}, ${color}`,
+        ...(hasImg && natural && ratio ? { aspectRatio: String(ratio) } : {}),
+      }}
       title={book.title + (volumeText(book) ? ' · ' + volumeText(book) : '')}
+      data-cover-aspect={hasImg && natural && ratio ? 'natural' : cls}
     >
-      {!c.url && showText && (
+      {hasImg && (
+        <img src={c.url} alt={book.title} draggable={false} className="object-contain w-full h-full block"
+          onLoad={(e) => e.currentTarget.naturalHeight && setSeen({ url: c.url, r: e.currentTarget.naturalWidth / e.currentTarget.naturalHeight })} />
+      )}
+      {!hasImg && showText && (
         <div className={`absolute inset-0 pl-[12%] pr-2 py-2 flex flex-col justify-between text-white ${c.style === 'frame' ? 'm-1.5 border border-white/50' : ''}`}>
           <div className={`h-display font-bold leading-tight ${size === 'sm' ? 'text-[9px]' : 'text-sm'}`} style={{ textShadow: '0 1px 2px rgb(0 0 0 / .35)' }}>
             {book.title}
