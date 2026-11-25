@@ -9725,7 +9725,7 @@
   "settings": {
     "name": "Ode",
     "theme": "ttpd",
-    "mode": "light",
+    "mode": "dark",
     "goalBooks": 24,
     "goalPages": 8000,
     "primaryCurrency": "MYR",
