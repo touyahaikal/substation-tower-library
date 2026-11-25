@@ -5845,18 +5845,7 @@
       "year": 2026
     }
   ],
-  "tasks": [
-    {
-      "id": "t1",
-      "text": "Return Piranesi to the library",
-      "done": false
-    },
-    {
-      "id": "t2",
-      "text": "Update the wishlist before the book fair",
-      "done": false
-    }
-  ],
+  "tasks": [],
   "readDays": [
     "2026-11-23",
     "2026-11-22"
