@@ -14372,7 +14372,7 @@
   "settings": {
     "name": "Ode",
     "theme": "ttpd",
-    "pattern": "leaves",
+    "pattern": "dots",
     "patternDensity": "dense",
     "patternIntensity": "clear",
     "spacing": "roomy",
