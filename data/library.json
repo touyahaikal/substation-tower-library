@@ -14376,7 +14376,7 @@
     "patternDensity": "sparse",
     "patternIntensity": "faint",
     "spacing": "roomy",
-    "textSize": "large",
+    "textSize": "larger",
     "shelfDecor": "auto",
     "mode": "dark",
     "goalBooks": 24,
