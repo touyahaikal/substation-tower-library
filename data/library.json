@@ -3787,7 +3787,9 @@
         "Adventurous",
         "Whimsical"
       ],
-      "tropes": [],
+      "tropes": [
+        "Mentor Figure"
+      ],
       "contentWarnings": [],
       "spice": 0,
       "tears": 0,
