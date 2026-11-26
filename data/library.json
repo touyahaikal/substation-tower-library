@@ -7721,7 +7721,7 @@
       "hidden": false,
       "volume": null,
       "volumeLabel": "",
-      "isSeriesCover": false,
+      "isSeriesCover": true,
       "authors": [
         "Willow Bowery"
       ],
@@ -14391,14 +14391,14 @@
   "planned": [],
   "settings": {
     "name": "Ode",
-    "theme": "substation",
+    "theme": "ttpd",
     "pattern": "plain",
     "patternDensity": "balanced",
     "patternIntensity": "soft",
     "spacing": "roomy",
     "textSize": "normal",
     "shelfDecor": "off",
-    "mode": "dark",
+    "mode": "light",
     "goalBooks": 24,
     "goalPages": 8000,
     "primaryCurrency": "MYR",
