@@ -3783,7 +3783,10 @@
           "world": 5
         }
       },
-      "moods": [],
+      "moods": [
+        "Adventurous",
+        "Whimsical"
+      ],
       "tropes": [],
       "contentWarnings": [],
       "spice": 0,
