@@ -68,7 +68,7 @@ export default function Shelves() {
           <label className="btn cursor-pointer"><input type="checkbox" checked={decor} onChange={(e) => setDecor(e.target.checked)} /> {s.icon} {s.label}</label>
         </div>
       }>Shelves</PageTitle>
-      <div className="space-y-8">
+      <div className="space-y-4">
         {rows.map(([name, list], i) => (
           <section key={name}>
             <div className="flex items-baseline gap-2 mb-1">

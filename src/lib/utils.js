@@ -13,7 +13,7 @@ export const STATUSES = [
   { id: 'finished', label: 'Finished' },
 ]
 // colour per status as an "r g b" triple (Paused = warm amber, Finished = green; the others follow the theme)
-export const STATUS_RGB = { wishlist: 'var(--muted)', bought: 'var(--accent2)', reading: 'var(--accent)', paused: '217 154 15', finished: '22 163 74' }
+export const STATUS_RGB = { wishlist: 'var(--muted)', bought: '59 130 246', reading: 'var(--accent)', paused: '217 154 15', finished: '22 163 74' }
 export const statusColor = (id) => `rgb(${STATUS_RGB[id] || STATUS_RGB.wishlist})`
 export const inProgress = (b) => b.status === 'reading' || b.status === 'paused'
 export const statusLabel = (id) => (STATUSES.find((s) => s.id === id) || {}).label || id
@@ -128,9 +128,24 @@ export const syncYears = (b) => {
 
 // Bring older saved data up to the current shape (rating 0-5 -> 0-100, edition, ...)
 export const migrateBook = (b, fromVersion) => {
+  b = b && typeof b === 'object' ? b : {}
   const base = blankBook()
-  const m = { ...base, ...b, cover: { ...base.cover, ...(b.cover || {}) }, review: { ...base.review, ...(b.review || {}), scores: { ...base.review.scores, ...((b.review || {}).scores || {}) } } }
+  const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {})
+  const m = { ...base, ...b, cover: { ...base.cover, ...obj(b.cover) }, review: { ...base.review, ...obj(b.review), scores: { ...base.review.scores, ...obj(obj(b.review).scores) } } }
   m.id = b.id || base.id
+  // older / hand-edited files may hold null, strings or missing values: coerce everything the UI reads
+  const list = (v) => (Array.isArray(v) ? v.filter((x) => x != null) : [])
+  ;['genres', 'moods', 'tropes', 'contentWarnings'].forEach((k) => { m[k] = list(m[k]).map(String) })
+  m.quotes = list(m.quotes).filter((x) => x && typeof x === 'object').map((x) => ({ ...x, id: x.id || uid(), text: String(x.text ?? ''), date: String(x.date ?? '') }))
+  m.notes = list(m.notes).filter((x) => x && typeof x === 'object').map((x) => ({ ...x, id: x.id || uid(), text: String(x.text ?? ''), date: String(x.date ?? '') }))
+  m.readingLog = list(m.readingLog).filter((x) => x && typeof x === 'object').map((x) => ({ ...x, id: x.id || uid(), date: String(x.date ?? ''), pages: Number(x.pages) || 0 }))
+  m.characters = list(m.characters).filter((x) => x && typeof x === 'object').map((x, i) => ({ ...x, id: x.id || uid(), name: String(x.name ?? ''), x: Number.isFinite(Number(x.x)) ? Number(x.x) : 30 + (i % 4) * 160, y: Number.isFinite(Number(x.y)) ? Number(x.y) : 30 + Math.floor(i / 4) * 100 }))
+  m.relations = list(m.relations).filter((x) => x && typeof x === 'object')
+  m.vocab = list(m.vocab)
+  ;['title', 'author', 'summary', 'notesText', 'language', 'edition', 'publisher', 'volumeLabel'].forEach((k) => { m[k] = m[k] == null ? '' : String(m[k]) })
+  ;['pages', 'currentPage', 'audioMinutes', 'price', 'spice', 'tears', 'reads'].forEach((k) => { m[k] = Number(m[k]) || 0 })
+  m.review.rating = Number(m.review.rating) || 0
+  if (!['wishlist', 'bought', 'reading', 'paused', 'finished'].includes(m.status)) m.status = 'wishlist'
   if (!b.edition) m.edition = editionFromFormat(b.format)
   if ((fromVersion || 1) < 2 && m.review.rating && m.review.rating <= 5) m.review.rating = Math.round(m.review.rating * 20)
   return m
@@ -146,9 +161,10 @@ export const DEFAULT_TAGS = {
 export const TAG_FIELD = { genres: 'genres', moods: 'moods', tropes: 'tropes', warnings: 'contentWarnings' }
 // known tags = the saved list (or the defaults) plus anything a book already uses
 export const tagList = (settings, books, kind) => {
-  const base = (settings && settings.tags && settings.tags[kind]) || DEFAULT_TAGS[kind]
+  const saved = settings && settings.tags && Array.isArray(settings.tags[kind]) ? settings.tags[kind] : null
+  const base = saved || DEFAULT_TAGS[kind]
   const m = new Map()
-  base.forEach((t) => m.set(t.toLowerCase(), t))
+  base.forEach((t) => m.set(String(t).toLowerCase(), String(t)))
   books.forEach((b) => (b[TAG_FIELD[kind]] || []).forEach((t) => !m.has(t.toLowerCase()) && m.set(t.toLowerCase(), t)))
   return [...m.values()]
 }

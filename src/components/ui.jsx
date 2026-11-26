@@ -114,7 +114,7 @@ export function BookProgress({ book }) {
 
 export function Empty({ icon: Icon, children }) {
   return (
-    <div className="text-center text-muted py-10 text-sm">
+    <div className="text-center text-muted py-6 text-sm">
       {Icon && <Icon className="mx-auto mb-2 opacity-60" size={28} />}
       {children}
     </div>
@@ -137,7 +137,7 @@ export function Card({ title, action, children, className = '' }) {
 
 export function PageTitle({ children, sub, action }) {
   return (
-    <div className="flex items-end justify-between flex-wrap gap-2 mb-5">
+    <div className="flex items-end justify-between flex-wrap gap-2 mb-3">
       <div>
         <h1 className="h-display text-2xl sm:text-3xl font-bold">{children}</h1>
         {sub && <p className="text-sm text-muted mt-0.5">{sub}</p>}

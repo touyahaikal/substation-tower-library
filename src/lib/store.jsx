@@ -134,9 +134,19 @@ export function StoreProvider({ children }) {
     // theme + mode are per-visit display choices: keep what is on screen
     const { theme, mode } = dataRef.current.settings
     const ver = remote.schemaV || 1
-    const fixed = dedupeIds((remote.books || []).map((b) => migrateBook(b, ver)))
+    remote = remote && typeof remote === 'object' ? remote : {}
+    const arr = (v) => (Array.isArray(v) ? v : [])
+    const fixed = dedupeIds(arr(remote.books).filter((b) => b && typeof b === 'object').map((b) => migrateBook(b, ver)))
+    const rs = remote.settings && typeof remote.settings === 'object' ? remote.settings : {}
     if (fixed.changed) repairedRef.current = true // repaired duplicate ids: save the corrected file back to GitHub
-    setData({ ...base, ...remote, schemaV: SCHEMA_VERSION, books: fixed.books, settings: { ...base.settings, ...(remote.settings || {}), theme, mode, rates: { ...DEFAULT_RATES, ...((remote.settings || {}).rates || {}) } } })
+    setData({
+      ...base, ...remote, schemaV: SCHEMA_VERSION, books: fixed.books,
+      collections: arr(remote.collections).filter((c) => c && typeof c === 'object').map((c) => ({ ...c, bookIds: arr(c.bookIds) })),
+      challenges: arr(remote.challenges).filter((c) => c && typeof c === 'object'),
+      tasks: arr(remote.tasks).filter((c) => c && typeof c === 'object'),
+      readDays: arr(remote.readDays), pausedDays: arr(remote.pausedDays), planned: arr(remote.planned), badgesSeen: arr(remote.badgesSeen),
+      settings: { ...base.settings, ...rs, tags: rs.tags && typeof rs.tags === 'object' ? rs.tags : null, theme, mode, rates: { ...DEFAULT_RATES, ...(rs.rates && typeof rs.rates === 'object' ? rs.rates : {}) } },
+    })
   }
 
   // Commit the current data (PUT with the latest sha). Edits made while a save is running are picked up by the same loop.
@@ -394,6 +404,8 @@ export function StoreProvider({ children }) {
         }),
       readAgain: (id) =>
         patchBook(id, (b) => ({ status: 'reading', currentPage: 0, startDate: todayStr(), yearStarted: new Date().getFullYear(), finishDate: '', yearFinished: '', review: { ...b.review } })),
+      // +/- buttons: relative, computed from the latest state so rapid clicks never overwrite each other
+      bumpPage: (id, delta) => patchBook(id, (b) => { const t = unitTotal(b) || 0; const n = Math.max(0, (Number(b.currentPage) || 0) + delta); return { currentPage: t ? Math.min(t, n) : n } }),
       setCurrentPage: (id, val) => patchBook(id, (b) => ({ currentPage: Math.max(0, Number(val) || 0) })),
       logReading: (bookId, pages, date) => mutate((d) => logPages(d, bookId, pages, date)),
       quickRead: () => mutate((d) => ({ ...d, readDays: d.readDays.includes(todayStr()) ? d.readDays : [...d.readDays, todayStr()] })),

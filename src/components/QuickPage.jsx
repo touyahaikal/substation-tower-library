@@ -11,7 +11,8 @@ export default function QuickPage({ book, className = '' }) {
   const [v, setV] = useState(String(cur))
   useEffect(() => setV(String(cur)), [cur, book.id])
   const n = Math.max(0, Number(v) || 0)
-  const bump = (d) => setV(String(Math.max(0, total ? Math.min(total, n + d) : n + d)))
+  // functional update: several quick taps in a row each build on the previous one
+  const bump = (d) => setV((prev) => { const x = Math.max(0, Number(prev) || 0) + d; return String(Math.max(0, total ? Math.min(total, x) : x)) })
   const changed = n !== cur
   const save = () => {
     if (!changed) return flash('Nothing to save: the page is unchanged', 'info')

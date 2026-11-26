@@ -55,7 +55,7 @@ function CurrentlyReading() {
   )
   if (!reading.length) {
     return (
-      <Card title="Currently reading" className="md:col-span-2">
+      <Card title="Currently reading">
         <Empty icon={BookOpen}>
           Nothing in progress. <button className="text-accent underline" onClick={() => goLibrary('bought')}>Pick something from your Bought pile</button>.
         </Empty>
@@ -70,7 +70,7 @@ function CurrentlyReading() {
   return (
     <Card
       title="Currently reading"
-      className="md:col-span-2"
+     
       action={
         reading.length > 1 && (
           <div className="flex items-center gap-1 text-xs text-muted">
@@ -88,9 +88,9 @@ function CurrentlyReading() {
           <div className="text-sm text-muted mb-3">{b.author}</div>
           <ProgressBar value={progressOf(b)} />
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <button className="btn !p-1.5" onClick={() => actions.setCurrentPage(b.id, (b.currentPage || 0) - step)}><Minus size={14} /></button>
+            <button className="btn !p-1.5" onClick={() => actions.bumpPage(b.id, -step)}><Minus size={14} /></button>
             <input className="input !w-20 text-center" type="number" value={b.currentPage || 0} onChange={(e) => actions.setCurrentPage(b.id, e.target.value)} />
-            <button className="btn !p-1.5" onClick={() => actions.setCurrentPage(b.id, Math.min(total || 1e9, (b.currentPage || 0) + step))}><Plus size={14} /></button>
+            <button className="btn !p-1.5" onClick={() => actions.bumpPage(b.id, step)}><Plus size={14} /></button>
             <span className="text-xs text-muted font-mono">/ {total || '?'}{unitSuffix(b)} · {Math.round(progressOf(b) * 100)}%</span>
           </div>
           <div className="flex gap-2 mt-3 flex-wrap">
@@ -132,7 +132,7 @@ function RecentlyRead() {
   const { openBook } = useNav()
   const rec = books.filter((b) => b.status === 'finished').sort((a, b) => (b.finishDate || '').localeCompare(a.finishDate || '')).slice(0, 12)
   return (
-    <Card title="Recently read" className="md:col-span-2">
+    <Card title="Recently read">
       {rec.length === 0 ? <Empty>No finished books yet.</Empty> : (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {rec.map((b) => (
@@ -165,7 +165,7 @@ function MonthChart() {
   return (
     <Card
       title={`Month by month · ${year}`}
-      className="md:col-span-2"
+     
       action={
         <div className="flex">
           {['books', 'pages'].map((m) => (
@@ -262,9 +262,9 @@ function CollectionsOverview() {
   const { go } = useNav()
   return (
     <Card title="Collections" action={<button className="btn btn-ghost text-xs !py-0.5" onClick={() => go('collections')}>Manage</button>}>
-      <ul className="space-y-1.5 text-sm">
-        {collections.map((c) => (
-          <li key={c.id} className="flex justify-between"><span>{c.name}</span><span className="chip">{c.type}</span></li>
+      <ul className="flex flex-wrap gap-2 text-sm">
+        {(collections || []).map((c) => (
+          <li key={c.id} className="panel !py-1 px-3 flex items-center gap-2"><span>{c.name}</span><span className="chip">{c.type}</span></li>
         ))}
       </ul>
     </Card>
@@ -276,14 +276,19 @@ export default function Home() {
   return (
     <>
       <PageTitle sub="Your reading, at a glance">Home</PageTitle>
-      <div className="grid md:grid-cols-3 gap-4">
-        <CurrentlyReading />
-        <div className="space-y-4"><Streak /><AnnualGoal /></div>
-        <MonthChart />
-        <QuoteOfDay />
-        <RecentlyRead />
-        <WhatNext />
-        <CollectionsOverview />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start" data-home-grid>
+        <div className="lg:col-span-2 space-y-4 min-w-0">
+          <CurrentlyReading />
+          <MonthChart />
+          <RecentlyRead />
+          <CollectionsOverview />
+        </div>
+        <div className="space-y-4 min-w-0">
+          <Streak />
+          <AnnualGoal />
+          <QuoteOfDay />
+          <WhatNext />
+        </div>
       </div>
     </>
   )

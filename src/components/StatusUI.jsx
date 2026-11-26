@@ -7,7 +7,7 @@ import { statusColor, statusLabel, displayTitle, progressOf } from '../lib/utils
 // ---------- one-click status buttons (used on cards, the volume drawer and the book page) ----------
 // wishlist: I Bought It / Start Reading · bought: Start Reading · reading: Pause Reading / Mark as Finished
 // paused: Resume Reading / Mark as Finished · finished: Read it again
-export function StatusActions({ book, small, className = '' }) {
+export function StatusActions({ book, small, primaryOnly, className = '' }) {
   const { actions, flash } = useStore()
   const name = displayTitle(book)
   const cls = (primary) => `btn ${small ? '!py-1 text-xs' : ''} ${primary ? 'btn-primary' : ''}`
@@ -34,9 +34,10 @@ export function StatusActions({ book, small, className = '' }) {
     ],
     finished: [['Read it again', <RotateCcw size={sz} />, again, false]],
   }[book.status] || []
+  const shown = primaryOnly ? [list.find((x) => x[3]) || list[0]].filter(Boolean) : list
   return (
     <div className={`flex flex-wrap gap-1.5 ${className}`} onClick={(e) => e.stopPropagation()}>
-      {list.map(([label, icon, fn, primary]) => (
+      {shown.map(([label, icon, fn, primary]) => (
         <button key={label} className={cls(primary)} onClick={fn}>{icon} {label}</button>
       ))}
     </div>
@@ -44,11 +45,11 @@ export function StatusActions({ book, small, className = '' }) {
 }
 
 // ---------- status header bar above the cover ----------
-export function StatusHeader({ status, favorite }) {
+export function StatusHeader({ status, favorite, compact }) {
   const c = statusColor(status)
   const icon = status === 'finished' ? <Check size={12} strokeWidth={3} /> : status === 'paused' ? <Pause size={11} strokeWidth={3} /> : status === 'reading' ? <BookOpen size={12} /> : null
   return (
-    <div className="flex items-center justify-between px-4 py-1.5 text-[11px] font-mono font-bold tracking-wider uppercase" style={{ color: c, background: `color-mix(in srgb, ${c} 10%, transparent)` }} data-status-header={status}>
+    <div className={`flex items-center justify-between ${compact ? 'px-2.5 py-1' : 'px-4 py-1.5'} text-[11px] font-mono font-bold tracking-wider uppercase`} style={{ color: c, background: `color-mix(in srgb, ${c} 10%, transparent)` }} data-status-header={status}>
       <span className="inline-flex items-center gap-1.5">{icon}{status === 'bought' || status === 'wishlist' ? <span className="rounded-full border px-2 py-px" style={{ borderColor: c }}>{statusLabel(status)}</span> : status === 'reading' ? 'Currently Reading' : statusLabel(status)}</span>
       {status === 'finished' && favorite && <Heart size={13} className="fill-current" />}
     </div>
@@ -86,11 +87,11 @@ export function CornerBadge({ status, progress = 0, size = 28 }) {
 }
 
 // a cover with the status badge on its corner. `book` draws the cover; `status`/`progress` drive the badge
-export function BadgedCover({ book, status, progress, size = 'md', onClick, className }) {
+export function BadgedCover({ book, status, progress, size = 'md', onClick, className, wrapClass = 'shrink-0 h-fit' }) {
   const st = status || book.status
   const pr = progress ?? progressOf(book)
   return (
-    <div className="relative shrink-0 h-fit">
+    <div className={`relative ${wrapClass}`}>
       <Cover book={book} size={size} onClick={onClick} className={className} />
       <CornerBadge status={st} progress={pr} size={size === 'sm' ? 22 : 28} />
     </div>
@@ -98,12 +99,12 @@ export function BadgedCover({ book, status, progress, size = 'md', onClick, clas
 }
 
 // card shell: coloured top border, status header, optional thin progress bar at the bottom for readers
-export function StatusFrame({ status, favorite, progress, hidden, children, className = '' }) {
+export function StatusFrame({ status, favorite, progress, hidden, compact, children, className = '' }) {
   const c = statusColor(status)
   return (
-    <section className={`panel overflow-hidden relative ${hidden ? 'opacity-70' : ''} ${className}`} style={{ borderTop: `3px solid ${c}` }} data-status={status}>
-      <StatusHeader status={status} favorite={favorite} />
-      <div className="p-4">{children}</div>
+    <section className={`panel overflow-hidden relative ${compact ? 'flex flex-col' : ''} ${hidden ? 'opacity-70' : ''} ${className}`} style={{ borderTop: `3px solid ${c}` }} data-status={status}>
+      <StatusHeader status={status} favorite={favorite} compact={compact} />
+      <div className={compact ? 'p-2.5 flex-1 flex flex-col' : 'p-4'}>{children}</div>
       {status === 'reading' && (
         <div className="h-1 bg-line/60" data-bottom-bar>
           <div className="h-full bg-accent" style={{ width: `${Math.round(Math.min(1, progress || 0) * 100)}%` }} />

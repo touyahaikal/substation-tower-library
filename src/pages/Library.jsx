@@ -87,34 +87,34 @@ function EntryActions({ b, onAddVolumes, iconOnly }) {
 
 const isActive = (b) => b.status === 'reading' || b.status === 'paused' || b.status === 'bought'
 
-// ---------------------------------------------------------------- layout 1: Cards
-function EntryCard({ b, selected, onSelect, addVolumes }) {
-  const { openBook } = useNav()
+// ---------------------------------------------------------------- layout 1: Cards (dense grid; tap the chevron to expand inline)
+const GRID = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 items-start'
+
+function CompactCard({ g, onExpand, selected, onSelect }) {
+  const { openBook, openTitle } = useNav()
+  const single = !g.isCollection
+  const e = g.entries[0]
+  const cover = single ? e : g.cover
+  const go = () => (single ? openBook(e.id) : openTitle(g.key))
+  const pct = Math.round(g.progress * 100)
+  const rating = single ? e.review?.rating : g.rating
   return (
-    <StatusFrame status={b.status} favorite={b.favorite} progress={progressOf(b)} hidden={b.hidden}>
-      <div className="flex gap-4">
-        <input type="checkbox" className="mt-1 accent-[rgb(var(--accent))]" checked={!!selected} onChange={onSelect} aria-label="Select" />
-        <BadgedCover book={b} size="md" onClick={() => openBook(b.id)} />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <h3 className="h-display text-lg font-semibold leading-tight">{displayTitle(b)}</h3>
-              <div className="text-sm text-muted">{b.author}</div>
-              {b.status === 'finished' && <div className="mt-0.5"><RatingBadge value={b.review?.rating} /></div>}
-            </div>
-            <div className="text-right shrink-0">
-              {b.status !== 'finished' && <RatingBadge value={b.review?.rating} />}
-              {b.favorite && b.status !== 'finished' && <Heart size={13} className="text-accent fill-accent inline ml-2" />}
-              {b.price > 0 && b.status !== 'wishlist' && <div className="text-xs font-mono text-muted mt-0.5">{fmtMoney(b.price, b.currency)}</div>}
-            </div>
-          </div>
-          <div className="mt-2"><Chips b={b} /></div>
-          <Progress b={b} />
-          {isActive(b) && <QuickPage book={b} className="mt-2" />}
-          <StatusActions book={b} small className="mt-2" />
-          {b.notesText && <p className="text-xs text-muted mt-2 line-clamp-2">{b.notesText}</p>}
-          <div className="mt-3"><EntryActions b={b} onAddVolumes={addVolumes} /></div>
-        </div>
+    <StatusFrame compact status={g.status} favorite={g.favorite} progress={g.progress} hidden={g.hidden} className="h-full" >
+      <div className="relative">
+        <input type="checkbox" className="absolute left-0 top-0 z-10 accent-[rgb(var(--accent))]" checked={!!selected} onChange={onSelect} aria-label="Select" />
+        <div className="pt-1 pb-2"><BadgedCover book={cover} status={g.status} progress={g.progress} size="md" onClick={go} className="!w-full" wrapClass="w-[72%] mx-auto" /></div>
+      </div>
+      <h3 className="h-display text-sm font-semibold leading-snug line-clamp-2"><button className="text-left hover:text-accent" onClick={go} title={single ? displayTitle(e) : 'Open title page'}>{single ? displayTitle(e) : g.title}</button></h3>
+      <div className="text-xs text-muted truncate">{g.author}</div>
+      <div className="flex items-center gap-1.5 flex-wrap mt-1 min-h-[1.25rem] text-[11px] font-mono text-muted">
+        {g.status === 'finished' || Number(rating) > 0 ? <RatingBadge value={rating} /> : null}
+        {(g.status === 'reading' || g.status === 'paused') && <span>{pct}%</span>}
+        {!single && <span className="chip !py-0 !px-1.5 !text-[10px]"><Layers size={10} className="mr-1" />{g.entries.length}{g.editions.length > 1 ? ` · ${g.editions.length} formats` : ''}</span>}
+        {g.hidden && <span className="chip !py-0 !px-1.5 !text-[10px]">Hidden</span>}
+      </div>
+      <div className="flex gap-1.5 mt-auto pt-2">
+        {single ? <StatusActions book={e} small primaryOnly className="flex-1 [&>button]:w-full [&>button]:justify-center" /> : <button className="btn !py-1 text-xs flex-1 justify-center" onClick={go}>Open title</button>}
+        <button className="btn !py-1 !px-2 text-xs" onClick={onExpand} aria-label={`Expand ${g.title}`} title="Expand details"><ChevronDown size={14} /></button>
       </div>
     </StatusFrame>
   )
@@ -215,9 +215,9 @@ function PosterExpanded({ g, onCollapse, addVolumes }) {
   }
   const years = [['Released', b.yearReleased], ['Bought', b.yearBought], ['Started', b.yearStarted], ['Finished', b.yearFinished]].filter(([, y]) => y)
   return (
-    <section className={`col-span-full panel p-4 ${b.hidden ? 'opacity-70' : ''}`}>
+    <StatusFrame status={b.status} favorite={b.favorite} progress={progressOf(b)} hidden={b.hidden} className="col-span-full">
       <div className="flex gap-4 flex-wrap sm:flex-nowrap">
-        <Cover book={b} size="lg" onClick={() => openBook(b.id)} />
+        <BadgedCover book={b} size="lg" onClick={() => openBook(b.id)} />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -241,7 +241,7 @@ function PosterExpanded({ g, onCollapse, addVolumes }) {
           <div className="mt-3"><EntryActions b={b} onAddVolumes={addVolumes} /></div>
         </div>
       </div>
-    </section>
+    </StatusFrame>
   )
 }
 
@@ -312,15 +312,8 @@ export default function Library() {
   }
 
   const renderGroup = (g) => {
-    if (g.isCollection) {
-      return view === 'list'
-        ? <GroupRow key={g.key} g={g} open={expanded.has(g.key)} onToggle={() => toggleOpen(g.key)} selected={isSel(g)} onSelect={() => toggleSel(g)} />
-        : <SeriesCard key={g.key} group={g} defaultOpen selected={isSel(g)} onSelect={() => toggleSel(g)} />
-    }
-    const b = g.entries[0]
-    return view === 'list'
-      ? <EntryRow key={g.key} b={b} selected={isSel(g)} onSelect={() => toggleSel(g)} addVolumes={startAdd} />
-      : <EntryCard key={g.key} b={b} selected={isSel(g)} onSelect={() => toggleSel(g)} addVolumes={startAdd} />
+    if (g.isCollection) return <GroupRow key={g.key} g={g} open={expanded.has(g.key)} onToggle={() => toggleOpen(g.key)} selected={isSel(g)} onSelect={() => toggleSel(g)} />
+    return <EntryRow key={g.key} b={g.entries[0]} selected={isSel(g)} onSelect={() => toggleSel(g)} addVolumes={startAdd} />
   }
 
   return (
@@ -338,7 +331,7 @@ export default function Library() {
         tabs={[['all', `All (${counts.all})`], ...STATUSES.map((s) => [s.id, `${s.label} (${counts[s.id]})`])]}
       />
 
-      <div className="flex flex-wrap gap-2 my-4 items-center">
+      <div className="flex flex-wrap gap-2 my-3 items-center">
         <div className="relative">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
           <input className="input !w-64 !pl-8" placeholder="Search title, author, genre, language, notes" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search library" />
@@ -354,7 +347,7 @@ export default function Library() {
           Show Hidden{hiddenCount > 0 && <span className="chip font-mono">{hiddenCount}</span>}
         </label>
         <div className="flex ml-auto items-center gap-2">
-          {view === 'covers' && anyExpanded && <button className="btn" onClick={() => setExpanded(new Set())}><ChevronsUp size={14} /> Collapse All</button>}
+          {view !== 'list' && anyExpanded && <button className="btn" onClick={() => setExpanded(new Set())}><ChevronsUp size={14} /> Collapse All</button>}
           <div className="flex">
             {[['cards', 'Cards', StretchHorizontal], ['list', 'List', ListIcon], ['covers', 'Covers', LayoutGrid]].map(([id, label, Icon]) => (
               <button key={id} onClick={() => { setView(id); setExpanded(new Set()) }} aria-label={`${label} layout`} aria-pressed={view === id} className={`btn !rounded-none first:!rounded-l-[var(--radius)] last:!rounded-r-[var(--radius)] ${view === id ? 'btn-primary' : ''}`}><Icon size={14} /> <span className="hidden sm:inline">{label}</span></button>
@@ -376,17 +369,19 @@ export default function Library() {
 
       {list.length === 0 ? (
         <Empty>{books.length === 0 ? 'Your library is empty. Press N or use “New entry” to add your first book.' : hiddenCount > 0 && !showHidden ? 'No entries match. Some entries are hidden; switch on “Show Hidden” to see them.' : 'No entries match these filters.'}</Empty>
-      ) : view === 'covers' ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-5 items-start">
+      ) : view === 'list' ? (
+        <div className="space-y-2">{list.map(renderGroup)}</div>
+      ) : (
+        <div className={GRID} data-view={view}>
           {list.map((g) => (expanded.has(g.key)
             ? <PosterExpanded key={g.key} g={g} onCollapse={() => closeOne(g.key)} addVolumes={startAdd} />
-            : <Poster key={g.key} g={g} onToggle={() => toggleOpen(g.key)} />))}
+            : view === 'covers'
+              ? <Poster key={g.key} g={g} onToggle={() => toggleOpen(g.key)} />
+              : <CompactCard key={g.key} g={g} onExpand={() => toggleOpen(g.key)} selected={isSel(g)} onSelect={() => toggleSel(g)} />))}
         </div>
-      ) : (
-        <div className="space-y-3">{list.map(renderGroup)}</div>
       )}
 
-      <div className="mt-8 grid md:grid-cols-2 gap-4">
+      <div className="mt-6 grid md:grid-cols-2 gap-4 items-start">
         <SpendingBreakdown books={books} title="Library spending" />
         <Card title="Library stats">
           <ul className="text-sm space-y-1.5">

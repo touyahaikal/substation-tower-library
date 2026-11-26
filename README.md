@@ -104,3 +104,9 @@ Every entry with the same title (case-insensitive, extra spaces ignored) forms o
 ## Covers
 
 Cover shape follows the Edition / Format: Manga and Light Novel `1/1.55`, Paperback / Hardcover / Novel `2/3`, Databook / Artbook / Omnibus `3/4`, Audiobook square, eBook and other formats follow the image's own ratio (`2/3` for generated covers). Images are always drawn `object-contain` inside a softly tinted, rounded frame, so the full front cover is visible everywhere (Library, Covers wall, title and book pages, Shelves, Home, Calendar).
+
+## Layout & reliability notes
+
+- Workspace fills the window (max 1600 px). Library Cards/Covers use a dense 2→6 column grid; tap a card's chevron to expand it inline. Home is a two-column composition (3-col grid on large screens). Title and volume pages are side-by-side (240 px cover + details).
+- Loading or importing a library sanitises older / hand-edited JSON (null lists, bad numbers, unknown statuses), so no page can crash on missing fields.
+- `+` / `−` page buttons and Ctrl+Z history use the latest state, so rapid clicks never overwrite each other; GitHub saves stay serialised (one commit at a time, `[skip ci]`).

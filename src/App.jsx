@@ -84,8 +84,8 @@ function Shell() {
             Guest mode: changes live only in this tab and vanish on refresh. Use <b>Admin Sync</b> to save your library to GitHub.
           </div>
         )}
-        <main className={`flex-1 overflow-y-auto px-3 sm:px-6 pt-5 ${timer ? 'pb-40' : 'pb-24'}`}>
-          <div className="max-w-6xl mx-auto">
+        <main className={`flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pt-4 ${timer ? 'pb-40' : 'pb-24'}`}>
+          <div className="w-full max-w-[1600px] mx-auto">
             <Page />
           </div>
         </main>
@@ -104,12 +104,12 @@ function Shell() {
       <TimerDock />
       {!bookModal && (
         <button
-          className={`btn btn-primary fixed right-4 sm:right-6 ${timer ? 'bottom-24' : 'bottom-4 sm:bottom-6'} z-40 !rounded-full !px-4 !py-3 shadow-lg`}
+          className={`btn btn-primary fixed right-3 sm:right-6 ${timer ? 'bottom-24' : 'bottom-3 sm:bottom-6'} z-40 !rounded-full !p-3 sm:!px-4 shadow-lg`}
           onClick={() => setBookModal({})}
           title="New entry (press N)"
           aria-label="New entry"
         >
-          <Plus size={18} /> <span className="font-semibold">New entry</span>
+          <Plus size={18} /> <span className="font-semibold hidden sm:inline">New entry</span>
         </button>
       )}
       <ConfirmHost />

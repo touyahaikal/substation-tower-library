@@ -39,9 +39,9 @@ export default function TitlePage() {
       </nav>
 
       <section className="panel overflow-hidden" style={{ borderTop: `3px solid ${color}` }} data-page="title">
-        <div className="p-4 flex gap-5 flex-wrap sm:flex-nowrap">
-          <div className="relative shrink-0 h-fit">
-            <Cover book={group.cover} size="xl" />
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-[170px_1fr] md:grid-cols-[240px_1fr] gap-4 md:gap-6">
+          <div className="relative h-fit w-[170px] sm:w-full mx-auto sm:mx-0">
+            <Cover book={group.cover} size="xl" className="!w-full" />
             <CornerBadge status={group.status} progress={group.progress} size={34} />
           </div>
           <div className="flex-1 min-w-0">
@@ -88,9 +88,9 @@ export default function TitlePage() {
         </div>
       </section>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <Tabs value={active} onChange={setTab} tabs={tabs} />
-        <div className="pt-4 space-y-5">
+        <div className="pt-3 space-y-4">
           {byCat[active].map((ed, i) => (
             <div key={ed.edition} className={i ? 'border-t border-dashed border-line pt-4' : ''}>
               <EditionBlock ed={ed} primary={active === 'volumes'} startAdd={startAdd} openDrawer={openBook} bulkDefault={ed.entries.length > 1} />

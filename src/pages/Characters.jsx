@@ -4,7 +4,7 @@ import { PageTitle, Empty } from '../components/ui.jsx'
 import CharacterBoard from '../components/CharacterBoard.jsx'
 import CharacterModal from '../components/CharacterModal.jsx'
 import { useStore } from '../lib/store.jsx'
-import { buildGroups, volNum } from '../lib/groups.js'
+import { buildGroups, volNum, titleKey as tkey } from '../lib/groups.js'
 import { avatarOf, displayTitle } from '../lib/utils.js'
 
 // "Vol. 1" for the main edition, "Databook 1" / "Light Novel 2" for the others
@@ -29,6 +29,8 @@ export default function Characters() {
   const inScope = vol ? [vol] : scope
   const mainEd = group ? group.editions[0].edition : null
   const rows = inScope.flatMap((b) => (b.characters || []).map((c) => ({ c, b })))
+  const mainByTitle = useMemo(() => Object.fromEntries(groups.map((g) => [g.key, g.editions[0].edition])), [groups])
+  const mainEditionOf = (t) => mainByTitle[tkey(t)]
   const board = vol || (group && group.entries.length === 1 ? group.entries[0] : null)
   const choices = (group ? volumes : books).map((b) => ({ id: b.id, label: group ? entryBadge(b, mainEd) + (b.volumeLabel ? ` — ${b.volumeLabel}` : '') : displayTitle(b) }))
   const defaultBook = (vol || (group && volumes[0]) || books[0] || {}).id
@@ -39,16 +41,16 @@ export default function Characters() {
       {books.length === 0 ? <Empty icon={Users}>Add a book first.</Empty> : (
         <>
           <div className="flex items-end gap-3 flex-wrap mb-4">
-            <label className="block">
+            <label className="block w-full sm:w-auto">
               <span className="label">Official title</span>
-              <select className="input !w-auto min-w-[14rem]" value={titleKey} onChange={(e) => { setTitleKey(e.target.value); setVolId('') }} aria-label="Official title">
+              <select className="input !w-full sm:!w-auto sm:min-w-[14rem]" value={titleKey} onChange={(e) => { setTitleKey(e.target.value); setVolId('') }} aria-label="Official title">
                 <option value="">All Titles</option>
                 {groups.map((g) => { const n = g.entries.reduce((s, b) => s + (b.characters || []).length, 0); return <option key={g.key} value={g.key}>{g.title}{n ? ` (${n})` : ''}</option> })}
               </select>
             </label>
-            <label className="block">
+            <label className="block w-full sm:w-auto">
               <span className="label">Volume / edition</span>
-              <select className="input !w-auto min-w-[11rem]" value={volId} disabled={!group} onChange={(e) => setVolId(e.target.value)} aria-label="Volume or edition">
+              <select className="input !w-full sm:!w-auto sm:min-w-[11rem]" value={volId} disabled={!group} onChange={(e) => setVolId(e.target.value)} aria-label="Volume or edition">
                 <option value="">All Volumes</option>
                 {volumes.map((b) => <option key={b.id} value={b.id}>{entryBadge(b, mainEd)}{b.volumeLabel ? ` — ${b.volumeLabel}` : ''}{group.editions.length > 1 && (b.edition || '') === mainEd ? '' : ''}</option>)}
               </select>
@@ -65,7 +67,7 @@ export default function Characters() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-semibold truncate">{c.name}</span>
-                        <span className="chip font-mono !text-[10px]" data-volume-badge>{entryBadge(b, buildGroups(books.filter((x) => x.title.trim().toLowerCase() === b.title.trim().toLowerCase()))[0]?.editions[0].edition)}</span>
+                        <span className="chip font-mono !text-[10px]" data-volume-badge>{entryBadge(b, mainEditionOf(b.title))}</span>
                       </div>
                       {!group && <div className="text-[11px] text-muted truncate">{b.title}</div>}
                       <div className="text-xs text-accent">{c.role}</div>

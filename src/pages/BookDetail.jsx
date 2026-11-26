@@ -81,9 +81,9 @@ export default function BookDetail() {
       </nav>
 
       <div className="panel overflow-hidden" style={{ borderTop: `3px solid ${color}` }} data-page="book">
-       <div className="p-4 flex gap-5 flex-wrap sm:flex-nowrap">
-        <div className="relative shrink-0 h-fit">
-          <Cover book={b} size="xl" />
+       <div className="p-4 grid grid-cols-1 sm:grid-cols-[170px_1fr] md:grid-cols-[240px_1fr] gap-4 md:gap-6">
+        <div className="relative h-fit w-[170px] sm:w-full mx-auto sm:mx-0">
+          <Cover book={b} size="xl" className="!w-full" />
           <CornerBadge status={b.status} progress={progressOf(b)} size={34} />
         </div>
         <div className="flex-1 min-w-0">
@@ -101,7 +101,7 @@ export default function BookDetail() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 my-3" aria-label="Status">
+          <div className="flex flex-wrap gap-1.5 my-2" aria-label="Status">
             {STATUSES.map((s) => (
               <button key={s.id} className="chip transition" data-pill={s.id} aria-pressed={b.status === s.id}
                 style={b.status === s.id ? { color: '#fff', background: statusColor(s.id), borderColor: statusColor(s.id), fontWeight: 600 } : {}}
@@ -127,33 +127,34 @@ export default function BookDetail() {
             <button className="btn" onClick={() => startAdd(sameEd)}><Layers size={14} /> {b.volume != null && b.volume !== '' ? 'Add more volumes' : 'Add volumes'}</button>
           </div>
           {b.reads > 1 && <div className="text-xs text-muted mt-3 font-mono">Read {b.reads}×</div>}
+        <div className="mt-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2" data-meta>
+            {meta.map(([l, v]) => (
+              <div key={l} className="rounded-full border border-line px-3 py-1 text-center min-w-0">
+                <div className="text-[10px] font-mono tracking-wider uppercase text-muted">{l}</div>
+                <div className="text-sm font-semibold truncate">{v}</div>
+              </div>
+            ))}
+          </div>
+          <button className="mt-4 flex items-center gap-1.5 text-xs font-mono font-bold tracking-wider uppercase text-muted hover:text-ink" onClick={() => setAbout(!about)} aria-expanded={about}>
+            <ChevronDown size={14} className={`transition ${about ? '' : '-rotate-90'}`} /> About the book
+          </button>
+          {about && (
+            <div className="mt-2 text-sm leading-relaxed space-y-2" data-about>
+              {b.summary ? <p>{b.summary}</p> : <p className="text-muted">No description yet. Use Edit to add one.</p>}
+              {b.notesText && <p className="whitespace-pre-wrap border-l-2 border-line pl-3 text-muted">{b.notesText}</p>}
+            </div>
+          )}
+         </div>
+  
         </div>
        </div>
 
-       <div className="px-4 pb-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2" data-meta>
-          {meta.map(([l, v]) => (
-            <div key={l} className="rounded-full border border-line px-4 py-1.5 text-center min-w-0">
-              <div className="text-[10px] font-mono tracking-wider uppercase text-muted">{l}</div>
-              <div className="text-sm font-semibold truncate">{v}</div>
-            </div>
-          ))}
-        </div>
-        <button className="mt-4 flex items-center gap-1.5 text-xs font-mono font-bold tracking-wider uppercase text-muted hover:text-ink" onClick={() => setAbout(!about)} aria-expanded={about}>
-          <ChevronDown size={14} className={`transition ${about ? '' : '-rotate-90'}`} /> About the book
-        </button>
-        {about && (
-          <div className="mt-2 text-sm leading-relaxed space-y-2" data-about>
-            {b.summary ? <p>{b.summary}</p> : <p className="text-muted">No description yet. Use Edit to add one.</p>}
-            {b.notesText && <p className="whitespace-pre-wrap border-l-2 border-line pl-3 text-muted">{b.notesText}</p>}
-          </div>
-        )}
-       </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <Tabs value={tab} onChange={setTab} tabs={[['review', 'Review'], ['quotes', `Quotes (${b.quotes.length})`], ['notes', `Notes (${b.notes.length})`], ['log', 'Reading Log'], ['chars', 'Characters'], ['mood', 'Mood & Tropes']]} />
-        <div className="pt-4">
+        <div className="pt-3">
           {tab === 'review' && (
             <div className="grid md:grid-cols-2 gap-4">
               <Card title="Rating & review">
