@@ -3778,9 +3778,9 @@
         "scores": {
           "plot": 5,
           "characters": 4,
-          "writing": 0,
-          "pacing": 0,
-          "world": 0
+          "writing": 4,
+          "pacing": 5,
+          "world": 5
         }
       },
       "moods": [],
