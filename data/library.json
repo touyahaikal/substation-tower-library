@@ -28,15 +28,15 @@
       "yearStarted": 2021,
       "yearFinished": 2021,
       "hidden": false,
-      "volume": 1,
+      "volume": null,
       "volumeLabel": "ＴＶアニメ「呪術廻戦」公式スタ−トガイド （愛蔵版コミックス）",
       "isSeriesCover": false,
       "authors": [
         "Gege Akutami"
       ],
-      "numbering": "subtitle",
+      "numbering": "named",
       "subtitle": "ＴＶアニメ「呪術廻戦」公式スタ−トガイド （愛蔵版コミックス）",
-      "companionName": "",
+      "companionName": "ＴＶアニメ「呪術廻戦」公式スタ−トガイド （愛蔵版コミックス）",
       "links": [],
       "releaseDate": "",
       "starred": false,
