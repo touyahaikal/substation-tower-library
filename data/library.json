@@ -14372,7 +14372,7 @@
   "settings": {
     "name": "Ode",
     "theme": "substation",
-    "pattern": "plain",
+    "pattern": "grid",
     "patternDensity": "dense",
     "patternIntensity": "faint",
     "spacing": "roomy",
