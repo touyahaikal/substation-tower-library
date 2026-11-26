@@ -3,6 +3,7 @@ import { sampleBooks, sampleCollections, defaultSettings, sampleChallenges, samp
 import { DEFAULT_RATES } from './currency.js'
 import { uid, todayStr, blankBook, migrateBook, syncYears, SCHEMA_VERSION, unitTotal, tagList, TAG_FIELD } from './utils.js'
 import { titleKey } from './groups.js'
+import { resolveMode, APPEARANCE_KEYS } from './themes.js'
 import * as gh from './github.js'
 
 const Ctx = createContext(null)
@@ -111,9 +112,22 @@ export function StoreProvider({ children }) {
 
   // Theme attributes on <html>
   useEffect(() => {
-    document.documentElement.dataset.theme = data.settings.theme
-    document.documentElement.dataset.mode = data.settings.mode
-  }, [data.settings.theme, data.settings.mode])
+    const s = data.settings, el = document.documentElement
+    const apply = () => {
+      el.dataset.theme = s.theme
+      el.dataset.mode = resolveMode(s.mode)
+    }
+    apply()
+    el.dataset.pattern = s.pattern || 'plain'
+    el.dataset.density = s.patternDensity || 'balanced'
+    el.dataset.intensity = s.patternIntensity || 'soft'
+    el.dataset.spacing = s.spacing || 'roomy'
+    el.dataset.text = s.textSize || 'normal'
+    if (s.mode !== 'auto' || !window.matchMedia) return
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    mq.addEventListener?.('change', apply)
+    return () => mq.removeEventListener?.('change', apply)
+  }, [data.settings.theme, data.settings.mode, data.settings.pattern, data.settings.patternDensity, data.settings.patternIntensity, data.settings.spacing, data.settings.textSize])
 
   // ----- Sync: one JSON file in your repo, via the GitHub Contents API -----
   const shaRef = useRef(null)
@@ -132,7 +146,8 @@ export function StoreProvider({ children }) {
     undoRef.current = []
     const base = freshData()
     // theme + mode are per-visit display choices: keep what is on screen
-    const { theme, mode } = dataRef.current.settings
+    const keep = {}
+    APPEARANCE_KEYS.forEach((k) => { keep[k] = dataRef.current.settings[k] })
     const ver = remote.schemaV || 1
     remote = remote && typeof remote === 'object' ? remote : {}
     const arr = (v) => (Array.isArray(v) ? v : [])
@@ -145,7 +160,7 @@ export function StoreProvider({ children }) {
       challenges: arr(remote.challenges).filter((c) => c && typeof c === 'object'),
       tasks: arr(remote.tasks).filter((c) => c && typeof c === 'object'),
       readDays: arr(remote.readDays), pausedDays: arr(remote.pausedDays), planned: arr(remote.planned), badgesSeen: arr(remote.badgesSeen),
-      settings: { ...base.settings, ...rs, tags: rs.tags && typeof rs.tags === 'object' ? rs.tags : null, theme, mode, rates: { ...DEFAULT_RATES, ...(rs.rates && typeof rs.rates === 'object' ? rs.rates : {}) } },
+      settings: { ...base.settings, ...rs, tags: rs.tags && typeof rs.tags === 'object' ? rs.tags : null, ...keep, rates: { ...DEFAULT_RATES, ...(rs.rates && typeof rs.rates === 'object' ? rs.rates : {}) } },
     })
   }
 
@@ -467,7 +482,7 @@ export function StoreProvider({ children }) {
       resetDemo: () => {
         dirtyRef.current = true
         setReadOnly(false)
-        setData((d) => ({ ...freshData(), settings: { ...freshData().settings, theme: d.settings.theme, mode: d.settings.mode, name: d.settings.name } }))
+        setData((d) => ({ ...freshData(), settings: { ...freshData().settings, ...Object.fromEntries(APPEARANCE_KEYS.map((k) => [k, d.settings[k]])), name: d.settings.name } }))
       },
       importData: (obj) => {
         if (!obj || !Array.isArray(obj.books)) throw new Error('Not a valid library file')

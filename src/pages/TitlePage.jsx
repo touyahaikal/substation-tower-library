@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { ArrowLeft, Eye, EyeOff, Layers, Star } from 'lucide-react'
-import { Cover, Tabs, ProgressBar, RatingBadge, Empty } from '../components/ui.jsx'
+import { Cover, ProgressBar, RatingBadge, Empty } from '../components/ui.jsx'
 import { DeleteButton } from '../components/Confirm.jsx'
 import { EditionBlock, useVolumeGenerator } from '../components/SeriesCard.jsx'
 import { CornerBadge } from '../components/StatusUI.jsx'
@@ -9,24 +9,21 @@ import { useNav } from '../lib/nav.jsx'
 import { buildGroups, volNum } from '../lib/groups.js'
 import { statusLabel, statusColor, displayTitle } from '../lib/utils.js'
 
-const categoryOf = (ed, isMain) => (isMain ? 'volumes' : /databook/i.test(ed.edition) ? 'databooks' : /light\s*novel/i.test(ed.edition) ? 'lightnovels' : 'other')
-const CATS = [['volumes', 'Volumes'], ['databooks', 'Databooks'], ['lightnovels', 'Light Novels'], ['other', 'Other Formats']]
+const categoryOf = (ed) => (/light\s*novel|^novel$/i.test(ed.edition) ? 'lightnovels' : /databook|fanbook/i.test(ed.edition) ? 'databooks' : /guidebook/i.test(ed.edition) ? 'guidebooks' : /artbook/i.test(ed.edition) ? 'artbooks' : 'other')
+const CATS = [['lightnovels', 'Light Novels'], ['databooks', 'Databooks / Fanbooks'], ['guidebooks', 'Guidebooks'], ['artbooks', 'Artbooks'], ['other', 'Other formats']]
 
 // Level 1: the Official Title master page (every volume, databook and light novel of one title)
 export default function TitlePage() {
   const { books, actions, flash } = useStore()
   const { titleId, openBook, goLibrary } = useNav()
-  const [tab, setTab] = useState('volumes')
   const [startAdd, genEl] = useVolumeGenerator()
   const group = useMemo(() => buildGroups(books).find((g) => g.key === titleId), [books, titleId])
   if (!group) return <Empty>Title not found. <button className="underline" onClick={() => goLibrary('all')}>Back to library</button></Empty>
 
   const ids = group.entries.map((b) => b.id)
   const [main, ...rest] = group.editions
-  const byCat = { volumes: [main], databooks: [], lightnovels: [], other: [] }
-  rest.forEach((ed) => byCat[categoryOf(ed, false)].push(ed))
-  const tabs = CATS.filter(([id]) => id === 'volumes' || byCat[id].length).map(([id, label]) => [id, `${label} (${byCat[id].reduce((s, e) => s + e.entries.length, 0)})`])
-  const active = byCat[tab]?.length ? tab : 'volumes'
+  const byCat = { lightnovels: [], databooks: [], guidebooks: [], artbooks: [], other: [] }
+  rest.forEach((ed) => byCat[categoryOf(ed)].push(ed))
   const color = statusColor(group.status)
   const total = group.entries.length
 
@@ -88,18 +85,21 @@ export default function TitlePage() {
         </div>
       </section>
 
-      <div className="mt-4">
-        <Tabs value={active} onChange={setTab} tabs={tabs} />
-        <div className="pt-3 space-y-4">
-          {byCat[active].map((ed, i) => (
-            <div key={ed.edition} className={i ? 'border-t border-dashed border-line pt-4' : ''}>
-              <EditionBlock ed={ed} primary={active === 'volumes'} startAdd={startAdd} openDrawer={openBook} bulkDefault={ed.entries.length > 1} />
+      <div className="mt-4" data-sections>
+        <section data-cat="primary">
+          <EditionBlock ed={main} primary startAdd={startAdd} openDrawer={openBook} />
+        </section>
+        {CATS.filter(([id]) => byCat[id].length).map(([id, label]) => (
+          <section key={id} data-cat={id} className="border-t border-dashed border-line mt-5 pt-4">
+            <h2 className="h-display text-base font-semibold mb-2">{label} <span className="text-xs text-muted font-mono">{byCat[id].reduce((n, e) => n + e.entries.length, 0)}</span></h2>
+            <div className="space-y-4">
+              {byCat[id].map((ed) => <EditionBlock key={ed.edition} ed={ed} startAdd={startAdd} openDrawer={openBook} />)}
             </div>
-          ))}
-          <div className="flex gap-3 text-[11px] text-muted flex-wrap items-center">
-            {['wishlist', 'bought', 'reading', 'paused', 'finished'].map((s) => <span key={s} className={`vtile vtile-${s} !h-5 !min-w-0 !px-2 !text-[10px] cursor-default`}>{statusLabel(s)}</span>)}
-            <span>Tap a volume to open its page.</span>
-          </div>
+          </section>
+        ))}
+        <div className="flex gap-3 text-[11px] text-muted flex-wrap items-center mt-5">
+          {['wishlist', 'bought', 'reading', 'paused', 'finished'].map((s) => <span key={s} className={`vtile vtile-${s} !h-5 !min-w-0 !px-2 !text-[10px] cursor-default`}>{statusLabel(s)}</span>)}
+          <span>Tap a tile to open its page.</span>
         </div>
       </div>
       {genEl}

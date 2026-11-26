@@ -8,6 +8,7 @@ const mk = (o) => {
   return { ...b, ...o, id: o.id || uid(), cover: { ...b.cover, ...(o.cover || {}) }, review: { ...b.review, ...(o.review || {}), scores: { ...b.review.scores, ...((o.review || {}).scores || {}) } } }
 }
 
+const fut = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10)
 export const sampleBooks = () => [
   mk({
     id: 'b1', title: 'The Midnight Library', author: 'Matt Haig', genres: ['Fantasy', 'Literary'], pages: 304, status: 'finished',
@@ -78,11 +79,11 @@ export const sampleBooks = () => [
     readWhere: 'Owned', currency: 'USD', price: 18.99, cover: { color: '#7C6F64', style: 'frame' }, moods: ['Dark', 'Reflective'],
   }),
   mk({
-    id: 'b11', title: 'Klara and the Sun', author: 'Kazuo Ishiguro', genres: ['Sci-Fi', 'Literary'], pages: 303, status: 'wishlist', priority: 'Must Read',
+    id: 'b11', title: 'Klara and the Sun', author: 'Kazuo Ishiguro', genres: ['Sci-Fi', 'Literary'], pages: 303, status: 'wishlist', priority: 'Must Read', starred: true, releaseDate: fut(12), wishKind: 'read',
     cover: { color: '#B8860B', style: 'circle' }, currency: 'EUR', price: 14, moods: ['Reflective'],
   }),
   mk({
-    id: 'b12', title: 'Braiding Sweetgrass', author: 'Robin Wall Kimmerer', genres: ['Non-fiction'], pages: 391, status: 'wishlist', priority: 'Someday',
+    id: 'b12', title: 'Braiding Sweetgrass', author: 'Robin Wall Kimmerer', genres: ['Non-fiction'], pages: 391, status: 'wishlist', priority: 'Someday', releaseDate: fut(40),
     cover: { color: '#2F5D50', style: 'stripes' }, currency: 'USD', price: 17,
   }),
   // Demo of same-title grouping: one title, two editions (Manga is the main edition: more volumes)
@@ -100,12 +101,26 @@ export const sampleBooks = () => [
   ...[[1, 'finished'], [2, 'bought'], [3, 'wishlist']].map(([n, status], i) =>
     mk({
       id: `sb-n-${n}`, title: 'Skyward Blades', author: 'Aiko Mori', genres: ['Fantasy', 'Action'], language: 'Japanese', edition: 'Light Novel', format: 'Paper',
-      pages: 264, status, volume: n, yearReleased: 2016, currency: 'MYR', price: status === 'wishlist' ? 0 : 39.9,
+      pages: 264, status, volume: n, numbering: 'subtitle', subtitle: ['Summer of Ashes, Autumn of Dust', 'Thorny Road at Dawn', 'The Last Gale'][n - 1], yearReleased: 2016, currency: 'MYR', price: status === 'wishlist' ? 0 : 39.9,
       currentPage: status === 'finished' ? 264 : 0, startDate: status === 'finished' ? d(3, 1) : '', finishDate: status === 'finished' ? d(3, 20) : '',
       cover: { color: '#4B3F72', style: 'frame' }, reads: status === 'finished' ? 1 : 0, review: status === 'finished' ? { rating: 4 } : {},
       characters: n === 1 ? [{ id: 'ch-n1-a', name: 'Captain Haru', avatar: 'olderman', role: 'Mentor', desc: 'Veteran of the sky wars.', aka: 'The Old Hawk', group: 'Wind Corps', age: '58', firstAppearance: 'Chapter 2', quote: 'Fly lower than your fear.', x: 30, y: 30 }] : [],
     })
   ),
+  ...extraBooks(),
+]
+
+const extraBooks = () => [
+  mk({
+    id: 'sb-fan', title: 'Skyward Blades', author: 'Aiko Mori', genres: ['Fantasy', 'Action'], language: 'English', edition: 'Fanbook', format: 'Paper',
+    pages: 144, status: 'bought', numbering: 'named', companionName: 'Official Fanbook', yearReleased: 2020, currency: 'MYR', price: 49.9,
+    cover: { color: '#8A5A44', style: 'frame' }, links: [{ id: 'l1', url: 'https://www.kinokuniya.com/' }],
+  }),
+  mk({
+    id: 'sb-guide', title: 'Skyward Blades', author: 'Aiko Mori', genres: ['Fantasy', 'Action'], language: 'English', edition: 'Guidebook', format: 'Paper',
+    pages: 120, status: 'wishlist', numbering: 'named', companionName: 'TV Anime Official Start Guide', yearReleased: 2024, currency: 'JPY', price: 1650, releaseDate: fut(25),
+    cover: { color: '#2F6D80', style: 'diagonal' },
+  }),
 ]
 
 const CHARS = {
@@ -127,6 +142,7 @@ export const sampleCollections = () => [
 export const defaultSettings = () => ({
   name: 'Reader',
   theme: 'ttpd',
+  pattern: 'plain', patternDensity: 'balanced', patternIntensity: 'soft', spacing: 'roomy', textSize: 'normal', shelfDecor: 'auto',
   mode: 'light',
   goalBooks: 24,
   goalPages: 8000,

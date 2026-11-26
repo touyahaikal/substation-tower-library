@@ -9,7 +9,7 @@ import CharacterBoard from '../components/CharacterBoard.jsx'
 import { StatusActions, CornerBadge } from '../components/StatusUI.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { STATUSES, statusLabel, statusColor, tagList, todayStr, uid, progressOf, unitTotal, displayTitle } from '../lib/utils.js'
+import { STATUSES, statusLabel, statusColor, tagList, todayStr, uid, progressOf, unitTotal, displayTitle, volumeText, linkInfo, comingText, daysUntil } from '../lib/utils.js'
 import { fmtMoney } from '../lib/currency.js'
 
 const toggle = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
@@ -49,7 +49,7 @@ export default function BookDetail() {
   const prev = at > 0 ? sameEd[at - 1] : null
   const next = at >= 0 && at < sameEd.length - 1 ? sameEd[at + 1] : null
   const inSeries = siblings.length > 1 || (b.volume != null && b.volume !== '')
-  const vol = b.volume != null && b.volume !== '' ? `Vol. ${b.volume}` : ''
+  const vol = volumeText({ ...b, title: '' }).split(' — ')[0].split(' · ')[0]
   const crumb = [vol || b.edition || 'Book', vol && b.edition ? `· ${b.edition}` : ''].join(' ').trim()
   const days = b.startDate && b.finishDate ? Math.max(1, Math.round((new Date(b.finishDate) - new Date(b.startDate)) / 86400000) + 1) : null
   const meta = [
@@ -112,7 +112,15 @@ export default function BookDetail() {
             {b.hidden && <span className="chip">Hidden</span>}
             {b.genres.map((g) => <span key={g} className="chip">{g}</span>)}
             {b.readWhere === 'Borrowed / Library' && b.returnDate && <span className="chip">Return by {b.returnDate}</span>}
+            {b.releaseDate && daysUntil(b.releaseDate) > 0 && <span className="chip !border-accent text-accent">Coming out {b.releaseDate} · {comingText(b.releaseDate)}</span>}
           </div>
+          {(b.links || []).length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2" data-links>
+              {b.links.map((l) => (
+                <a key={l.id} href={l.url} target="_blank" rel="noreferrer noopener" title={l.url} data-link-badge className="chip !border-accent text-accent hover:bg-accent/10 inline-flex items-center gap-1">{linkInfo(l.url).label} ↗</a>
+              ))}
+            </div>
+          )}
 
           {(b.status === 'reading' || b.status === 'paused' || b.status === 'bought') && (
             <div className="mb-3">

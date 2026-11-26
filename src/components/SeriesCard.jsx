@@ -6,7 +6,7 @@ import { DeleteButton } from './Confirm.jsx'
 import QuickPage from './QuickPage.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { blankBook, uid, STATUSES, statusLabel, displayTitle, syncYears } from '../lib/utils.js'
+import { blankBook, uid, STATUSES, statusLabel, displayTitle, syncYears, tileLabel, numPrefix } from '../lib/utils.js'
 import { byVolume, planVolumes, titleKey, volNum } from '../lib/groups.js'
 import { compressImage } from '../lib/image.js'
 
@@ -168,7 +168,7 @@ export function EditionBlock({ ed, primary, startAdd, openDrawer, bulkDefault })
   const n = ed.entries.length
   const isSingle = n === 1 && volNum(ed.entries[0]) == null
   const [open, setOpen] = useState(true)
-  const [bulk, setBulk] = useState(bulkDefault ?? (primary && !isSingle))
+  const [bulk, setBulk] = useState(bulkDefault ?? false) // Bulk status stays collapsed until asked for
   return (
     <div>
       <div className="flex items-center gap-2 flex-wrap">
@@ -186,7 +186,11 @@ export function EditionBlock({ ed, primary, startAdd, openDrawer, bulkDefault })
         <div className="flex flex-wrap gap-1.5 mt-3">
           {ed.entries.map((b) => (
             <button key={b.id} className={`vtile vtile-${b.status} ${b.hidden ? 'opacity-50' : ''}`} onClick={() => openDrawer(b.id)} title={`${displayTitle(b)} · ${statusLabel(b.status)}${b.isSeriesCover ? ' · series cover' : ''}`} aria-label={displayTitle(b)}>
-              {volNum(b) == null ? 'Book' : volNum(b)}
+              {b.numbering === 'named'
+                ? <span className="max-w-[10rem] truncate px-1">{tileLabel(b)}</span>
+                : b.numbering === 'subtitle'
+                  ? <span className="flex items-center gap-1.5 px-1"><b>{numPrefix(b)} {tileLabel(b)}</b>{(b.subtitle || b.volumeLabel) && <span className="text-[10px] font-normal max-w-[11rem] truncate">{b.subtitle || b.volumeLabel}</span>}</span>
+                  : volNum(b) == null ? 'Book' : volNum(b)}
               {b.isSeriesCover && <Star size={8} className="absolute -top-1 -right-1 fill-accent text-accent" />}
             </button>
           ))}

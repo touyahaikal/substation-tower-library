@@ -1,13 +1,13 @@
 import React from 'react'
 import {
   Home, Library, LayoutGrid, Heart, Layers, FolderHeart, NotebookPen, Users, CalendarDays,
-  Trophy, ListChecks, Sparkles, Settings, ChevronsLeft, ChevronsRight, BookOpen,
+  Trophy, ListChecks, Sparkles, Compass, Settings, ChevronsLeft, ChevronsRight, BookOpen,
 } from 'lucide-react'
 import { useNav } from '../lib/nav.jsx'
 
 const SECTIONS = [
   ['Main', [['home', 'Home', Home], ['library', 'Library', Library]]],
-  ['Organize', [['shelves', 'Shelves', LayoutGrid], ['wishlist', 'Wish List', Heart], ['series', 'Series', Layers], ['collections', 'Collections', FolderHeart]]],
+  ['Organize', [['shelves', 'Shelves', LayoutGrid], ['wishlist', 'Wish List', Heart], ['readnext', 'Read next', Compass], ['series', 'Series', Layers], ['collections', 'Collections', FolderHeart]]],
   ['Write', [['journal', 'Journal', NotebookPen], ['characters', 'Characters', Users], ['calendar', 'Calendar', CalendarDays]]],
   ['Progress', [['challenges', 'Challenges', Trophy], ['tasks', 'Tasks', ListChecks], ['recap', 'Recap', Sparkles]]],
 ]

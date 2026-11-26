@@ -23,11 +23,12 @@ import Recap from './pages/Recap.jsx'
 import Preferences from './pages/Preferences.jsx'
 import BookDetail from './pages/BookDetail.jsx'
 import TitlePage from './pages/TitlePage.jsx'
+import ReadNext from './pages/ReadNext.jsx'
 
 const PAGES = {
   home: Home, library: Library, shelves: Shelves, wishlist: WishList, series: Series, collections: Collections,
   journal: Journal, characters: Characters, calendar: Calendar, challenges: Challenges, tasks: Tasks, recap: Recap,
-  preferences: Preferences, book: BookDetail, title: TitlePage,
+  preferences: Preferences, book: BookDetail, title: TitlePage, readnext: ReadNext,
 }
 
 function Shell() {

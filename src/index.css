@@ -70,14 +70,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle grid for Substation Tower dark mode */
-[data-theme='substation'][data-mode='dark'] body {
-  background-image:
-    linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
 /* ---------- Reusable component classes ---------- */
 @layer components {
   .panel {
@@ -155,3 +147,42 @@ main .panel .flex > div:not([class*='shrink']) { min-width: 0; }
   .vtile-finished { @apply border-accent bg-accent text-white; }
   [data-mode='dark'] .vtile-finished { color: #0b0d0f; }
 }
+
+/* ---------- Appearance: background pattern, spacing, text size ---------- */
+html { font-size: 16px; }
+html[data-text='large'] { font-size: 17.5px; }
+html[data-text='larger'] { font-size: 19px; }
+#root { position: relative; z-index: 1; }
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none;
+  background: rgb(var(--ink));
+  opacity: var(--pat-op, .09);
+  -webkit-mask-size: var(--pat-size, 80px); mask-size: var(--pat-size, 80px);
+  -webkit-mask-image: var(--pat-img); mask-image: var(--pat-img);
+}
+html[data-pattern]:not([data-pattern='plain']) body::before { display: block; }
+html[data-intensity='faint'] { --pat-op: .05; }
+html[data-intensity='soft'] { --pat-op: .1; }
+html[data-intensity='clear'] { --pat-op: .2; }
+html[data-density='sparse'] { --pat-size: 140px; }
+html[data-density='balanced'] { --pat-size: 90px; }
+html[data-density='dense'] { --pat-size: 56px; }
+html[data-pattern='flowers'] { --pat-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg fill='black'%3E%3Ccircle cx='30' cy='30' r='3'/%3E%3Cellipse cx='30' cy='20' rx='3.5' ry='6'/%3E%3Cellipse cx='30' cy='40' rx='3.5' ry='6'/%3E%3Cellipse cx='20' cy='30' rx='6' ry='3.5'/%3E%3Cellipse cx='40' cy='30' rx='6' ry='3.5'/%3E%3C/g%3E%3C/svg%3E"); }
+html[data-pattern='leaves'] { --pat-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 10 C42 18 44 34 30 50 C16 34 18 18 30 10Z' fill='black' transform='rotate%2825 30 30%29'/%3E%3C/svg%3E"); }
+html[data-pattern='stars'] { --pat-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 14 L33 25 L45 26 L36 33 L39 45 L30 38 L21 45 L24 33 L15 26 L27 25Z' fill='black'/%3E%3C/svg%3E"); }
+html[data-pattern='dots'] { --pat-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='2' fill='black'/%3E%3C/svg%3E"); }
+html[data-pattern='grid'] { --pat-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M40 0H0V40' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E"); }
+html[data-pattern='dots'][data-density='sparse'] { --pat-size: 40px; }
+html[data-pattern='dots'][data-density='balanced'] { --pat-size: 24px; }
+html[data-pattern='dots'][data-density='dense'] { --pat-size: 14px; }
+html[data-pattern='grid'][data-density='sparse'] { --pat-size: 64px; }
+html[data-pattern='grid'][data-density='balanced'] { --pat-size: 40px; }
+html[data-pattern='grid'][data-density='dense'] { --pat-size: 24px; }
+
+/* Compact spacing: tighter padding and gaps across pages */
+html[data-spacing='compact'] main .p-4 { padding: .625rem; }
+html[data-spacing='compact'] main .p-3 { padding: .5rem; }
+html[data-spacing='compact'] main .gap-4, html[data-spacing='compact'] main .gap-5, html[data-spacing='compact'] main .gap-6 { gap: .625rem; }
+html[data-spacing='compact'] main .space-y-4 > * + *, html[data-spacing='compact'] main .space-y-6 > * + * { margin-top: .625rem; }
+html[data-spacing='compact'] main .mb-4, html[data-spacing='compact'] main .mb-6 { margin-bottom: .625rem; }
+html[data-spacing='compact'] main .mt-4 { margin-top: .625rem; }

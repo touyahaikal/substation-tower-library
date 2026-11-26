@@ -10,7 +10,7 @@ export function Modal({ title, onClose, children, wide, footer }) {
   }, [onClose])
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`panel w-full ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'} max-h-[92vh] flex flex-col shadow-2xl`}>
+      <div className={`panel w-full ${wide === 'xl' ? 'sm:max-w-4xl' : wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'} max-h-[92vh] flex flex-col shadow-2xl`}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-line">
           <h2 className="h-display text-lg font-semibold">{title}</h2>
           <button className="btn btn-ghost !p-1" onClick={onClose} aria-label="Close">
@@ -29,7 +29,7 @@ export function coverAspect(book) {
   const e = ((book && book.edition) || '').trim().toLowerCase()
   if (/manga|light\s*novel/.test(e)) return { cls: 'aspect-[1/1.55]', natural: false }
   if (/paperback|hardcover|novel/.test(e)) return { cls: 'aspect-[2/3]', natural: false }
-  if (/databook|artbook|omnibus/.test(e)) return { cls: 'aspect-[3/4]', natural: false }
+  if (/databook|guidebook|fanbook|artbook|omnibus/.test(e)) return { cls: 'aspect-[3/4]', natural: false }
   if (/audio/.test(e)) return { cls: 'aspect-square', natural: false }
   return { cls: 'aspect-[2/3]', natural: true } // eBook / other: follow the image's own ratio
 }
@@ -143,6 +143,20 @@ export function PageTitle({ children, sub, action }) {
         {sub && <p className="text-sm text-muted mt-0.5">{sub}</p>}
       </div>
       {action}
+    </div>
+  )
+}
+
+export function PillTabs({ tabs, value, onChange, dots = {} }) {
+  return (
+    <div className="flex gap-1.5 overflow-x-auto pb-1" role="tablist">
+      {tabs.map(([id, label]) => (
+        <button key={id} role="tab" aria-selected={value === id} onClick={() => onChange(id)}
+          className={`relative px-3 py-1.5 rounded-full text-sm whitespace-nowrap border transition ${value === id ? 'btn-primary font-semibold' : 'border-line text-muted hover:text-ink'}`}>
+          {label}
+          {dots[id] && <span data-dot={id} className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${value === id ? 'bg-white ring-2 ring-accent' : 'bg-accent'}`} />}
+        </button>
+      ))}
     </div>
   )
 }

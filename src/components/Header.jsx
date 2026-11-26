@@ -2,7 +2,7 @@ import React from 'react'
 import { Search, Plus, Moon, Sun, Github, RefreshCw, CheckCircle2, AlertTriangle, CloudUpload, Palette, Eye, Save, Download } from 'lucide-react'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { variantName } from '../lib/themes.js'
+import { variantName, resolveMode } from '../lib/themes.js'
 
 function SyncBadge() {
   const { admin, syncState, syncError, readOnly, save, reload } = useStore()
@@ -61,10 +61,10 @@ export default function Header() {
       <div className="flex items-stretch">
         <button
           className="btn !rounded-r-none max-w-[190px] sm:max-w-[320px]"
-          onClick={() => actions.setSettings({ mode: settings.mode === 'light' ? 'dark' : 'light' })}
+          onClick={() => actions.setSettings({ mode: resolveMode(settings.mode) === 'light' ? 'dark' : 'light' })}
           title="Toggle light / dark"
         >
-          {settings.mode === 'light' ? <Sun size={14} /> : <Moon size={14} />}
+          {resolveMode(settings.mode) === 'light' ? <Sun size={14} /> : <Moon size={14} />}
           <span className="truncate text-[11px] font-mono hidden sm:inline">{v}</span>
         </button>
         <button

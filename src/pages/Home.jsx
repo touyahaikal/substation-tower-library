@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Minus, Plus, Flame, Pause, Play, Timer, Quote, Sparkles, BookOpen, Target } from 'lucide-react'
 import { Card, Cover, ProgressBar, PageTitle, Empty } from '../components/ui.jsx'
 import { useStore } from '../lib/store.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { computeStreak, progressOf, unitTotal, unitSuffix, todayStr, weekKey, MONTHS } from '../lib/utils.js'
+import ReleaseModal from '../components/ReleaseModal.jsx'
+import { daysUntil, comingText, volumeText, computeStreak, progressOf, unitTotal, unitSuffix, todayStr, weekKey, MONTHS } from '../lib/utils.js'
 
 function Streak() {
   const { readDays, pausedDays, actions } = useStore()
@@ -257,6 +258,47 @@ function WhatNext() {
   )
 }
 
+function ComingSoon() {
+  const { books } = useStore()
+  const { openBook } = useNav()
+  const [i, setI] = useState(0)
+  const [add, setAdd] = useState(false)
+  const [, tick] = useState(0)
+  useEffect(() => { const t = setInterval(() => tick((x) => x + 1), 60000); return () => clearInterval(t) }, [])
+  // wish-list books with a release date: upcoming first, then those already out
+  const list = books.filter((b) => b.status === 'wishlist' && b.releaseDate)
+    .sort((a, b) => a.releaseDate.localeCompare(b.releaseDate))
+  const upcoming = list.filter((b) => daysUntil(b.releaseDate) > 0)
+  const items = upcoming.length ? upcoming : list
+  const n = items.length
+  const cur = n ? items[Math.min(i, n - 1)] : null
+  const days = cur ? daysUntil(cur.releaseDate) : null
+  return (
+    <Card title="Coming out soon" action={n > 1 && (
+      <div className="flex items-center gap-1 text-xs text-muted">
+        <button className="btn btn-ghost !p-0.5" aria-label="Previous release" onClick={() => setI((Math.min(i, n - 1) - 1 + n) % n)}><ChevronLeft size={15} /></button>
+        <span className="font-mono">{Math.min(i, n - 1) + 1}/{n}</span>
+        <button className="btn btn-ghost !p-0.5" aria-label="Next release" onClick={() => setI((Math.min(i, n - 1) + 1) % n)}><ChevronRight size={15} /></button>
+      </div>
+    )}>
+      {cur ? (
+        <div className="flex items-center gap-3" data-coming>
+          <Cover book={cur} size="sm" onClick={() => openBook(cur.id)} />
+          <div className="min-w-0 flex-1">
+            <button className="font-semibold text-left hover:text-accent block max-w-full truncate" onClick={() => openBook(cur.id)}>{cur.title}</button>
+            {volumeText(cur) && <div className="text-xs text-muted truncate">{volumeText(cur)}</div>}
+            <div className="text-xs text-muted truncate">{cur.author}</div>
+            <div className={`mt-1 inline-block chip ${days <= 0 ? '!border-emerald-500/60 text-emerald-600' : '!border-accent text-accent'}`} data-countdown>{comingText(cur.releaseDate)}</div>
+            <div className="text-[11px] text-muted font-mono">{cur.releaseDate}</div>
+          </div>
+        </div>
+      ) : <div className="text-sm text-muted">No release dates yet.</div>}
+      <button className="btn w-full text-xs mt-3" onClick={() => setAdd(true)}>+ Add a release date</button>
+      {add && <ReleaseModal onClose={() => setAdd(false)} />}
+    </Card>
+  )
+}
+
 function CollectionsOverview() {
   const { collections } = useStore()
   const { go } = useNav()
@@ -287,6 +329,7 @@ export default function Home() {
           <Streak />
           <AnnualGoal />
           <QuoteOfDay />
+          <ComingSoon />
           <WhatNext />
         </div>
       </div>

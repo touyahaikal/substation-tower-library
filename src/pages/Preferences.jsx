@@ -5,9 +5,70 @@ import TagsManager from '../components/TagsManager.jsx'
 import { useStore } from '../lib/store.jsx'
 import { SyncPanel } from '../components/SyncModal.jsx'
 import { useNav } from '../lib/nav.jsx'
-import { THEMES, variantName } from '../lib/themes.js'
+import { THEMES, variantName, resolveMode } from '../lib/themes.js'
 import { CURRENCIES, DEFAULT_RATES, fetchLiveRates } from '../lib/currency.js'
 import { LANGUAGES, downloadJSON } from '../lib/utils.js'
+
+const VARIANTS = [
+  ['ttpd', 'light', 'THE TORTURED POETS DEPARTMENT', 'Light', ['#F5F2EB', '#FDFBF7', '#7C6F64']],
+  ['ttpd', 'dark', 'THE ANTHOLOGY', 'Dark', ['#121110', '#1B1918', '#A89B8C']],
+  ['substation', 'light', 'Substation Tower: Daylight Shift', 'Light', ['#F1F3F5', '#FFFFFF', '#D97706']],
+  ['substation', 'dark', 'Substation Tower: Blackout', 'Dark', ['#0B0D0F', '#14181D', '#F59E0B']],
+]
+function Seg({ label, value, onChange, options, name }) {
+  return (
+    <div data-seg={name}>
+      <div className="label">{label}</div>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map(([id, l]) => <button key={id} type="button" aria-pressed={value === id} className={`btn !py-1 text-sm ${value === id ? 'btn-primary' : ''}`} onClick={() => onChange(id)}>{l}</button>)}
+      </div>
+    </div>
+  )
+}
+function Appearance({ settings, set }) {
+  const pats = [['plain', 'Plain'], ['flowers', 'Flowers'], ['leaves', 'Leaves'], ['stars', 'Stars'], ['dots', 'Dots'], ...(settings.theme === 'substation' || settings.pattern === 'grid' ? [['grid', 'Technical grid']] : [])]
+  const resolved = resolveMode(settings.mode)
+  return (
+    <div className="space-y-4">
+      <Card title="Theme & brightness">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {VARIANTS.map(([t, m, name, bright, sw]) => {
+            const on = settings.theme === t && resolved === m
+            return (
+              <button key={t + m} type="button" data-variant={`${t}-${m}`} aria-pressed={on} onClick={() => set({ theme: t, mode: m })}
+                className={`panel text-left p-3 flex gap-3 items-center ${on ? '!border-accent ring-2 ring-accent' : 'hover:!border-accent'}`}>
+                <span className="flex w-16 h-12 rounded overflow-hidden border border-black/20 shrink-0" style={{ background: sw[0] }}>
+                  <span className="m-1.5 flex-1 rounded-sm" style={{ background: sw[1] }} />
+                  <span className="w-3 my-1.5 mr-1.5 rounded-sm" style={{ background: sw[2] }} />
+                </span>
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">{name}</span><span className="block text-[11px] text-muted">{bright}</span></span>
+              </button>
+            )
+          })}
+        </div>
+        <div className="mt-3">
+          <Seg name="mode" label="Brightness" value={settings.mode} onChange={(mode) => set({ mode })} options={[['light', 'Light'], ['dark', 'Dark'], ['auto', 'Auto']]} />
+          <p className="text-xs text-muted font-mono mt-2">Active: {variantName(settings.theme, settings.mode)}{settings.mode === 'auto' ? ' (follows your device)' : ''}</p>
+        </div>
+      </Card>
+      <Card title="Background pattern">
+        <div className="space-y-3">
+          <Seg name="pattern" label="Pattern" value={settings.pattern || 'plain'} onChange={(pattern) => set({ pattern })} options={pats} />
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Seg name="density" label="Density" value={settings.patternDensity || 'balanced'} onChange={(patternDensity) => set({ patternDensity })} options={[['sparse', 'Sparse'], ['balanced', 'Balanced'], ['dense', 'Dense']]} />
+            <Seg name="intensity" label="Intensity" value={settings.patternIntensity || 'soft'} onChange={(patternIntensity) => set({ patternIntensity })} options={[['faint', 'Faint'], ['soft', 'Soft'], ['clear', 'Clear']]} />
+          </div>
+        </div>
+      </Card>
+      <Card title="Layout & text">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Seg name="spacing" label="Spacing" value={settings.spacing || 'roomy'} onChange={(spacing) => set({ spacing })} options={[['roomy', 'Roomy'], ['compact', 'Compact']]} />
+          <Seg name="text" label="Text size" value={settings.textSize || 'normal'} onChange={(textSize) => set({ textSize })} options={[['normal', 'Normal'], ['large', 'Large'], ['larger', 'Larger']]} />
+        </div>
+      </Card>
+    </div>
+  )
+}
 
 export default function Preferences() {
   const { settings, actions, data, admin, syncState, flash, ask } = useStore()
@@ -66,19 +127,7 @@ export default function Preferences() {
             </Card>
           )}
 
-          {sec === 'appearance' && (
-            <Card title="Appearance">
-              <div className="space-y-2">
-                {Object.values(THEMES).map((t) => (
-                  <button key={t.id} onClick={() => set({ theme: t.id })} className={`w-full text-left panel px-3 py-2 text-sm ${settings.theme === t.id ? '!border-accent ring-1 ring-accent' : ''}`}>{t.label}</button>
-                ))}
-                <div className="flex gap-2 pt-1">
-                  {['light', 'dark'].map((m) => <button key={m} onClick={() => set({ mode: m })} className={`btn flex-1 capitalize ${settings.mode === m ? 'btn-primary' : ''}`}>{m}</button>)}
-                </div>
-                <p className="text-xs text-muted font-mono">Active: {variantName(settings.theme, settings.mode)}</p>
-              </div>
-            </Card>
-          )}
+          {sec === 'appearance' && <Appearance settings={settings} set={set} />}
 
           {sec === 'language' && (
             <Card title="Language & region">
