@@ -14378,7 +14378,7 @@
     "spacing": "roomy",
     "textSize": "large",
     "shelfDecor": "auto",
-    "mode": "light",
+    "mode": "dark",
     "goalBooks": 24,
     "goalPages": 8000,
     "primaryCurrency": "MYR",
