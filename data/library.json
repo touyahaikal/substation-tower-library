@@ -14392,9 +14392,9 @@
   "settings": {
     "name": "Ode",
     "theme": "substation",
-    "pattern": "plain",
-    "patternDensity": "balanced",
-    "patternIntensity": "soft",
+    "pattern": "grid",
+    "patternDensity": "dense",
+    "patternIntensity": "clear",
     "spacing": "roomy",
     "textSize": "large",
     "shelfDecor": "off",
