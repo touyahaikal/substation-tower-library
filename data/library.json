@@ -108,14 +108,14 @@
       "yearFinished": "",
       "hidden": false,
       "volume": 1,
-      "volumeLabel": "",
+      "volumeLabel": "Summer of Ashes, Autumn of Dust",
       "isSeriesCover": false,
       "authors": [
         "Gege Akutami"
       ],
-      "numbering": "named",
-      "subtitle": "",
-      "companionName": "Summer of Ashes, Autumn of Dust",
+      "numbering": "subtitle",
+      "subtitle": "Summer of Ashes, Autumn of Dust",
+      "companionName": "",
       "links": [],
       "releaseDate": "",
       "starred": false,
