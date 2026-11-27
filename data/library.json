@@ -29,11 +29,13 @@
       "yearFinished": "",
       "hidden": false,
       "volume": 2,
-      "volumeLabel": "",
+      "volumeLabel": "Thorny Road at Dawn",
       "isSeriesCover": false,
-      "authors": [],
-      "numbering": "volume",
-      "subtitle": "",
+      "authors": [
+        "Gege Akutami"
+      ],
+      "numbering": "subtitle",
+      "subtitle": "Thorny Road at Dawn",
       "companionName": "",
       "links": [],
       "releaseDate": "",
