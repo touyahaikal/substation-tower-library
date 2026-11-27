@@ -426,7 +426,7 @@
       "hidden": false,
       "volume": 1,
       "volumeLabel": "ＴＶアニメ「呪術廻戦」公式スタ−トガイド （愛蔵版コミックス）",
-      "isSeriesCover": true,
+      "isSeriesCover": false,
       "authors": [
         "Gege Akutami"
       ],
@@ -505,7 +505,7 @@
       "hidden": false,
       "volume": 0,
       "volumeLabel": "Blinding Darkness",
-      "isSeriesCover": false,
+      "isSeriesCover": true,
       "authors": [
         "Gege Akutami"
       ],
